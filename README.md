@@ -8,4 +8,4 @@ Fonte: API de dados abertos do ComprasNet (http://compras.dados.gov.br)
 ### Dependências
 
 * Python 3
-* Pacotes do NLTK: floresta, averaged_perceptron_tagger
+* Pacotes do NLTK: floresta, mac_morpho, averaged_perceptron_tagger
