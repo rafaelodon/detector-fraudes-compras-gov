@@ -118,22 +118,24 @@ class AnalisadorComprasNet:
                     if id_licitacao not in self.itens_licitacoes:                    
                         txt_licitacao = self.cache.buscar_json('http://compras.dados.gov.br/licitacoes/id/licitacao/'+id_licitacao+'/itens.json',
                             'licitacao_'+id_licitacao+'.json')
-                        json_licitacao = json.loads(txt_licitacao)
-                        itens = json_licitacao['_embedded']['itensLicitacao']
 
-                        if len(itens) > 0:
-                            logging.debug('Analisando licitacao '+id_licitacao)        
-                            self.itens_licitacoes[id_licitacao] = itens
-                            for item in itens:
-                                descricao = item['descricao_item']                
-                                tags = self.tagger.postag(descricao)
-                                adjs = [t for t in tags if t[1] == 'ADJ']
+                        if txt_licitacao:                            
+                            json_licitacao = json.loads(txt_licitacao)
+                            itens = json_licitacao['_embedded']['itensLicitacao']
 
-                                for tag in adjs:
-                                    if tag[0] in self.adjs_count:
-                                        self.adjs_count[tag[0]] += 1
-                                    else:
-                                        self.adjs_count[tag[0]] = 1
+                            if len(itens) > 0:
+                                logging.debug('Analisando licitacao '+id_licitacao)        
+                                self.itens_licitacoes[id_licitacao] = itens
+                                for item in itens:
+                                    descricao = item['descricao_item']                
+                                    tags = self.tagger.postag(descricao)
+                                    adjs = [t for t in tags if t[1] == 'ADJ']
+
+                                    for tag in adjs:
+                                        if tag[0] in self.adjs_count:
+                                            self.adjs_count[tag[0]] += 1
+                                        else:
+                                            self.adjs_count[tag[0]] = 1
                 except KeyError:
                     pass            
 

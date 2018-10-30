@@ -1,0 +1,1 @@
+{"_links":{"self":{"href":"http://compras.dados.gov.br/licitacoes/v1/licitacoes.json?item_servico=515","title":"Lista de licitações filtrados por item_servico=515."},"first":{"href":"/licitacoes/v1/licitacoes.json?item_servico=515&offset=0","title":"Primeira página"}},"_embedded":{"licitacoes":[]}}
