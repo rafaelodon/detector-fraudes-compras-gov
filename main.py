@@ -4,9 +4,11 @@
 import logging
 import json
 
-from json_api_cache import *
 from portuguese_tagger import *
-from analisador_compras import *
+from coletor import *
+from extrator import *
+#from analisador import *
+
 
 def main():    
 
@@ -17,14 +19,17 @@ def main():
 
     logging.debug("Iniciando")
     
-    jsonCache = JsonApiCache()
-    #jsonCache.set_modo_offline()
+    coletor = Coletor()    
+    coletor.coletar_compras_e_licitacoes_do_servico('17663')
 
-    tagger = PortugueseTagger()    
+    extrator = Extrator()
+    extrator.extrair_texto_compras('./cache/compras*.json')
 
-    analisador = AnalisadorCompras()    
-    analisador.set_cache(jsonCache)
-    analisador.set_tagger(tagger)
+    #tagger = PortugueseTagger()    
+
+    #analisador = AnalisadorCompras()    
+    #analisador.set_cache(jsonCache)
+    #analisador.set_tagger(tagger)
 
     #txt_servicos = jsonCache.buscar_json("http://compras.dados.gov.br/servicos/v1/servicos.json", "servicos.json")        
     #json_servicos = json.loads(txt_servicos)
@@ -33,11 +38,11 @@ def main():
     #for servico in servicos:        
     #    analisador.analisarServico(servico['codigo'])    
 
-    #analisador.analisar_servico('264')
+    #analisador.analisar_servico('17663')
 
-    analisador.analisar_irps()
+    #analisador.analisar_irps()
     
-    analisador.imprimirContagens()
+    #analisador.imprimirContagens()
 
 
 if __name__ == "__main__":    

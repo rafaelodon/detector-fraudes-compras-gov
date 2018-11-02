@@ -7,7 +7,7 @@ import json
 import os
 import codecs
 
-class JsonApiCache():
+class RequestCache():
 
     def __init__(self):
         self.modo_offline = False
