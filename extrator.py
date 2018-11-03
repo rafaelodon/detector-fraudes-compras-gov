@@ -1,4 +1,5 @@
 import glob
+import os
 import logging
 import json
 import pandas
@@ -61,13 +62,14 @@ class Extrator():
                     try:
                         id_compra = compra['_links']['self']['href'].split('/')[4]                        
                         file_itens = self.base_dir+'/itens_compra_'+id_compra+'.json' 
-                        with open(file_itens, 'rb') as arquivo_itens:
-                            logging.debug('Exraindo texto dos itens de compra '+file_itens)
-                            txt_itens = arquivo_itens.read().decode('utf-8')
-                            json_itens = json.loads(txt_itens)
-                            itens = json_itens['_embedded']['compras']
-                            for item in itens:
-                                texto_itens += item['ds_detalhada'] + '. '
+                        if os.path.exists(file_itens):   
+                            with open(file_itens, 'rb') as arquivo_itens:
+                                logging.debug('Exraindo texto dos itens de compra '+file_itens)
+                                txt_itens = arquivo_itens.read().decode('utf-8')
+                                json_itens = json.loads(txt_itens)
+                                itens = json_itens['_embedded']['compras']
+                                for item in itens:
+                                    texto_itens += item['ds_detalhada'] + '. '
                     except KeyError:
                         pass
 
@@ -97,13 +99,14 @@ class Extrator():
                     try:
                         id_licitacao = licitacao['_links']['self']['href'].split('/')[4]                        
                         file_itens = self.base_dir+'/itens_licitacao_'+id_licitacao+'.json' 
-                        with open(file_itens, 'rb') as arquivo_itens:
-                            logging.debug('Exraindo texto dos itens de licitação '+file_itens)
-                            txt_itens = arquivo_itens.read().decode('utf-8')
-                            json_itens = json.loads(txt_itens)
-                            itens = json_itens['_embedded']['itensLicitacao']
-                            for item in itens:
-                                texto_itens += item['descricao_item'] + '. '
+                        if os.path.exists(file_itens):        
+                            with open(file_itens, 'rb') as arquivo_itens:
+                                logging.debug('Exraindo texto dos itens de licitação '+file_itens)
+                                txt_itens = arquivo_itens.read().decode('utf-8')
+                                json_itens = json.loads(txt_itens)
+                                itens = json_itens['_embedded']['itensLicitacao']
+                                for item in itens:
+                                    texto_itens += item['descricao_item'] + '. '
                     except KeyError:
                         pass
 

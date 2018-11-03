@@ -28,7 +28,8 @@ class Analisador:
     REMOVER = ['pregão eletrônico', 'pregão', 'aquisição', 'valor', 'limite', 
         'licitação', 'licitacao', 'justificativa', 'edital', 'contratação', 'fornecimento', 
         'prestação', 'preços', 'preço', 'formação', 'empresa', 'serviços', 'serviço',
-        'curso', 'cursos']
+        'curso', 'cursos', 'inscrição', 'inscricao', 'especializada', 'pagamento',
+        'servidor', 'servidores', 'taxa']
 
     SUBSTITUIR = [('emp resa','empresa'), ('mater ial', 'material')]
 
@@ -55,7 +56,7 @@ class Analisador:
 
     def analisar_topicos(self):
         '''
-        https://towardsdatascience.com/topic-modeling-and-latent-dirichlet-allocation-in-python-9bf156893c24
+        https://towarpipdsdatascience.com/topic-modeling-and-latent-dirichlet-allocation-in-python-9bf156893c24
         Usar LDA
         '''
 
@@ -68,7 +69,7 @@ class Analisador:
         https://hampao.wordpress.com/2016/04/08/building-a-wordcloud-using-a-td-idf-vectorizer-on-twitter-data/
         '''
         vectorizer = TfidfVectorizer(max_features=1500, min_df=5, max_df=0.7, stop_words=stopwords.words('portuguese'))
-        df = pd.read_sql_query('SELECT texto,tipo FROM documentos WHERE tipo="'+tipo+'"', self.connection)                
+        df = pd.read_sql_query('SELECT (texto_itens || texto) as texto,tipo FROM documentos WHERE tipo="'+tipo+'"', self.connection)                
         df['texto'] = df['texto'].apply(self.pre_processar)        
         tdm = vectorizer.fit_transform(df['texto'])
         freqs = { word : tdm.getcol(idx).sum() for word, idx in vectorizer.vocabulary_.items()}
