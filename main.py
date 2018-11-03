@@ -29,8 +29,8 @@ def main():
     #tagger = PortugueseTagger()    
 
     analisador = Analisador()        
-    analisador.gerar_tagclouds()    
-    #analisador.treinar_modelo()
+    #analisador.gerar_tagclouds()    
+    analisador.treinar_modelo()
     #analisador.lda()
 
 
