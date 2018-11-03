@@ -4,13 +4,12 @@
 import logging
 import json
 
-from portuguese_tagger import *
-from coletor import *
-from extrator import *
-#from analisador import *
+from portuguese_tagger import PortugueseTagger
+from coletor import Coletor
+from extrator import Extrator
+from analisador import Analisador
 
-
-def main():    
+def main():
 
     logging.basicConfig(
         level=logging.DEBUG,        
@@ -19,30 +18,20 @@ def main():
 
     logging.debug("Iniciando")
     
-    coletor = Coletor()    
-    coletor.coletar_compras_e_licitacoes_do_servico('17663')
+    #coletor = Coletor()        
+    #coletor.coletar_compras_e_licitacoes_do_servico('17663')        
 
-    extrator = Extrator()
-    extrator.extrair_texto_compras('./cache/compras*.json')
+    extrator = Extrator(override=True)
+    extrator.extrair_texto_compras_servico('17663')
+    extrator.extrair_texto_licitacoes('17663')
+    extrator.imprimir()
 
     #tagger = PortugueseTagger()    
 
-    #analisador = AnalisadorCompras()    
-    #analisador.set_cache(jsonCache)
-    #analisador.set_tagger(tagger)
-
-    #txt_servicos = jsonCache.buscar_json("http://compras.dados.gov.br/servicos/v1/servicos.json", "servicos.json")        
-    #json_servicos = json.loads(txt_servicos)
-    #servicos = json_servicos['_embedded']['servicos']    
-         
-    #for servico in servicos:        
-    #    analisador.analisarServico(servico['codigo'])    
-
-    #analisador.analisar_servico('17663')
-
-    #analisador.analisar_irps()
-    
-    #analisador.imprimirContagens()
+    #analisador = Analisador()    
+    #analisador.gerar_tagclouds()
+    #analisador.treinar_modelo()
+    #analisador.lda()
 
 
 if __name__ == "__main__":    

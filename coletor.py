@@ -13,6 +13,8 @@ class Coletor:
         self.modo_offline = False
         self.qtd_compras = 0
         self.qtd_licitacoes = 0
+        self.qtd_itens_compra = 0
+        self.qtd_itens_licitacao = 0
         self.cache_dir = './cache'
 
     def set_modo_offline(self):
@@ -27,6 +29,8 @@ class Coletor:
 
         logging.info(str(self.qtd_compras) + " compras coletadas.")
         logging.info(str(self.qtd_licitacoes) + " licitações coletadas.")
+        logging.info(str(self.qtd_itens_compra) + " itens de compras coletadas.")
+        logging.info(str(self.qtd_itens_licitacao) + " itens de licitações coletadas.")
 
     def __coletar_compras_do_servico(self, id_servico):                
         offset=0
@@ -36,6 +40,17 @@ class Coletor:
             if txt_compras:
                 json_compras = json.loads(txt_compras)                
                 self.qtd_compras += len(json_compras['_embedded']['compras'])                                
+
+                for compra in json_compras['_embedded']['compras']:
+                    try:
+                        #logging.debug('offset='+str(offset))
+                        url_itens = compra['_links']['Itens']['href']
+                        id_compra = url_itens.split('/')[4]
+                        self.__buscar_com_cache('http://compras.dados.gov.br'+url_itens+".json", 'itens_compra_'+id_compra+'.json')
+                        self.qtd_itens_compra += 1
+                    except KeyError:
+                        pass
+
                 try:
                     url = 'http://compras.dados.gov.br' + json_compras['_links']['next']['href']
                     offset += 1
@@ -50,11 +65,21 @@ class Coletor:
             if txt_licitacoes:
                 json_licitacoes = json.loads(txt_licitacoes)
                 self.qtd_licitacoes += len(json_licitacoes['_embedded']['licitacoes'])                                
-            try:
-                url = 'http://compras.dados.gov.br' + json_licitacoes['_links']['next']['href']
-                offset += 1
-            except KeyError:            
-                break
+                for licitacao in json_licitacoes['_embedded']['licitacoes']:                    
+                    try:
+                        #logging.debug('offset='+str(offset))
+                        url_itens = licitacao['_links']['itens']['href']
+                        id_licitacao = url_itens.split('/')[4]
+                        self.__buscar_com_cache('http://compras.dados.gov.br'+url_itens+".json", 'itens_licitacao_'+id_licitacao+'.json')
+                        self.qtd_itens_licitacao += 1
+                    except KeyError:                        
+                        pass
+
+                try:
+                    url = 'http://compras.dados.gov.br' + json_licitacoes['_links']['next']['href']
+                    offset += 1
+                except KeyError:            
+                    break
     
     def __buscar_com_cache(self, url, nome_arquivo_cache):
         data = ''        
