@@ -37,9 +37,14 @@ Pororó x y.
 ### Modelagem de Tóṕicos (LDA)
 
 Tópicos encontrados pelo LDA - 5 tópicos, 20 passadas, 4 palavras:
+
 1. 0.041*"aplicacao" + 0.040*"prepom" + 0.040*"aquaviarios" + 0.039*"previstos"
+
 2. 0.016*"curso" + 0.015*"gestao" + 0.015*"treinamento" + 0.013*"cur"
+
 3. 0.015*"curso" + 0.014*"servidores" + 0.007*"periodo" + 0.007*"material"
+
 4. 0.022*"conforme" + 0.019*"quantidades" + 0.018*"exigencias" + 0.018*"militares"
+
 5. 0.039*"arte" + 0.038*"acordo" + 0.034*"ensino" + 0.021*"cacoal"
 
