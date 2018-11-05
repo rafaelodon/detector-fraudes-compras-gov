@@ -22,7 +22,7 @@ def main():
     #coletor = Coletor()        
     #coletor.coletar_compras_e_licitacoes_do_servico('17663')        
 
-    #extrator = Extrator()
+    #extrator = Extrator(override=True)
     #extrator.extrair_texto_compras_servico('17663')
     #extrator.extrair_texto_licitacoes('17663')
     #extrator.imprimir()
@@ -30,8 +30,8 @@ def main():
     #tagger = PortugueseTagger()    
 
     analisador = Analisador()        
-    #analisador.gerar_tagclouds()    
-    analisador.treinar_modelo()
+    analisador.gerar_tagclouds()    
+    #analisador.treinar_modelo()
     #analisador.lda()
 
 

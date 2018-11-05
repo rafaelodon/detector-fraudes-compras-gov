@@ -26,6 +26,9 @@ class Extrator():
         else:
             self.override = False
 
+        self.compras_analisadas = dict()
+        self.licitaceos_analisadas = dict()
+
         self.connection = sqlite3.connect(self.db)        
         self.cursor = self.connection.cursor()
         self.cursor.execute('''
@@ -59,32 +62,36 @@ class Extrator():
                 compras = json_compras['_embedded']['compras']
                 for compra in compras:                                        
                     texto_itens = ''
-                    try:
-                        id_compra = compra['_links']['self']['href'].split('/')[4]                        
-                        file_itens = self.base_dir+'/itens_compra_'+id_compra+'.json' 
-                        if os.path.exists(file_itens):   
-                            with open(file_itens, 'rb') as arquivo_itens:
-                                logging.debug('Exraindo texto dos itens de compra '+file_itens)
-                                txt_itens = arquivo_itens.read().decode('utf-8')
-                                json_itens = json.loads(txt_itens)
-                                itens = json_itens['_embedded']['compras']
-                                for item in itens:
-                                    texto_itens += item['ds_detalhada'] + '. '
-                    except KeyError:
-                        pass
+                    id_compra = compra['_links']['self']['href'].split('/')[4]
+                    if id_compra in self.compras_analisadas:
+                        logging.debug('A compra '+id_compra+' já havia sido extraída')
+                    else:                            
+                        self.compras_analisadas[id_compra] = True
+                        try:                        
+                            file_itens = self.base_dir+'/itens_compra_'+id_compra+'.json' 
+                            if os.path.exists(file_itens):   
+                                with open(file_itens, 'rb') as arquivo_itens:
+                                    logging.debug('Exraindo texto dos itens de compra '+file_itens)
+                                    txt_itens = arquivo_itens.read().decode('utf-8')
+                                    json_itens = json.loads(txt_itens)
+                                    itens = json_itens['_embedded']['compras']
+                                    for item in itens:
+                                        texto_itens += item['ds_detalhada'] + '. '                            
+                        except KeyError:
+                            pass
 
-                    try:              
-                        self.gravar_documento({
-                            'arquivo' : file,                            
-                            'texto' : compra['ds_objeto_licitacao'] + compra['ds_justificativa'],
-                            'texto_itens' : texto_itens,
-                            'valor' : float(compra['vr_estimado']),
-                            'data' : datetime.strptime(compra['dtDeclaracaoDispensa'], '%Y-%m-%dT%H:%M:%S'),
-                            'id_servico' : id_servico,
-                            'tipo' : 'compra'
-                        })
-                    except KeyError:
-                        pass
+                        try:              
+                            self.gravar_documento({
+                                'arquivo' : file,                            
+                                'texto' : compra['ds_objeto_licitacao'] + compra['ds_justificativa'],
+                                'texto_itens' : texto_itens,
+                                'valor' : float(compra['vr_estimado']),
+                                'data' : datetime.strptime(compra['dtDeclaracaoDispensa'], '%Y-%m-%dT%H:%M:%S'),
+                                'id_servico' : id_servico,
+                                'tipo' : 'compra'
+                            })
+                        except KeyError:
+                            pass
             self.connection.commit()
 
     def extrair_texto_licitacoes(self, id_servico):
@@ -96,32 +103,36 @@ class Extrator():
                 licitacoes = json_licitacoes['_embedded']['licitacoes']
                 for licitacao in licitacoes:                    
                     texto_itens = ''
-                    try:
-                        id_licitacao = licitacao['_links']['self']['href'].split('/')[4]                        
-                        file_itens = self.base_dir+'/itens_licitacao_'+id_licitacao+'.json' 
-                        if os.path.exists(file_itens):        
-                            with open(file_itens, 'rb') as arquivo_itens:
-                                logging.debug('Exraindo texto dos itens de licitação '+file_itens)
-                                txt_itens = arquivo_itens.read().decode('utf-8')
-                                json_itens = json.loads(txt_itens)
-                                itens = json_itens['_embedded']['itensLicitacao']
-                                for item in itens:
-                                    texto_itens += item['descricao_item'] + '. '
-                    except KeyError:
-                        pass
+                    id_licitacao = licitacao['_links']['self']['href'].split('/')[4]                        
+                    if id_licitacao in self.licitaceos_analisadas:
+                        logging.debug('A licitação '+id_licitacao+' já havia sido extraída')
+                    else:
+                        try:
+                            
+                            file_itens = self.base_dir+'/itens_licitacao_'+id_licitacao+'.json' 
+                            if os.path.exists(file_itens):        
+                                with open(file_itens, 'rb') as arquivo_itens:
+                                    logging.debug('Exraindo texto dos itens de licitação '+file_itens)
+                                    txt_itens = arquivo_itens.read().decode('utf-8')
+                                    json_itens = json.loads(txt_itens)
+                                    itens = json_itens['_embedded']['itensLicitacao']
+                                    for item in itens:
+                                        texto_itens += item['descricao_item'] + '. '
+                        except KeyError:
+                            pass
 
-                    try:                        
-                        self.gravar_documento({
-                            'arquivo' : file,                            
-                            'texto' : licitacao['objeto'],
-                            'texto_itens' : texto_itens,
-                            'valor' : 0.0,
-                            'data' : datetime.strptime(licitacao['data_entrega_proposta'], '%Y-%m-%dT%H:%M:%S'),
-                            'id_servico' : id_servico,
-                            'tipo' : 'licitacao'
-                        })
-                    except KeyError:
-                        pass
+                        try:                        
+                            self.gravar_documento({
+                                'arquivo' : file,                            
+                                'texto' : licitacao['objeto'],
+                                'texto_itens' : texto_itens,
+                                'valor' : 0.0,
+                                'data' : datetime.strptime(licitacao['data_entrega_proposta'], '%Y-%m-%dT%H:%M:%S'),
+                                'id_servico' : id_servico,
+                                'tipo' : 'licitacao'
+                            })
+                        except KeyError:
+                            pass
             self.connection.commit()
 
     def imprimir(self):

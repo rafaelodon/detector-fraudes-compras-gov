@@ -13,6 +13,9 @@ Fonte: API de dados abertos do ComprasNet (http://compras.dados.gov.br)
 Serviço 17663 - Curso Aperfeiçoamento / Especialização Profissional
 http://compras.dados.gov.br/servicos/doc/servico/17663
 
+### Fontes técnicas
+https://hampao.wordpress.com/2016/04/08/building-a-wordcloud-using-a-td-idf-vectorizer-on-twitter-data/
+
 Logs de análise de palavras:
 
 2018-11-04 22:18:14,812 [DEBUG] - Iniciando

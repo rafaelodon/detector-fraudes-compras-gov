@@ -10,6 +10,7 @@ import unidecode
 import os
 import math
 import string
+import codecs
 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, RegexpTokenizer
@@ -23,9 +24,6 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import cross_val_score
 
 import gensim 
-from gensim.corpora.dictionary import Dictionary
-from gensim.utils import simple_preprocess 
-from gensim.parsing.preprocessing import STOPWORDS
 
 import matplotlib.pyplot as plt
 
@@ -48,8 +46,7 @@ class Analisador:
         if db is None:
             self.db = 'database.db'
         
-        self.stem_count = dict()
-        self.stem_top = dict()
+        self.stem_count = dict()        
         self.connection = sqlite3.connect(self.db)        
         self.cursor = self.connection.cursor()    
         self.stemmer = RSLPStemmer()
@@ -59,16 +56,19 @@ class Analisador:
         
 
     def carregar_vectorizer(self):
-        arquivo_vectorizer = './tfidf_vectorizer.pickle'
-        if False and os.path.exists(arquivo_vectorizer):        
+        arquivo_vectorizer = './cache/tfidf_vectorizer.pickle'
+        arquivo_stem_count = './cache/stem_count.json'
+        if os.path.exists(arquivo_vectorizer) and os.path.exists(arquivo_stem_count):
             logging.debug('Carregando o TF-IDF Vectorizer existente de '+arquivo_vectorizer)
             with open(arquivo_vectorizer, 'rb') as file:
                 self.vectorizer = pickle.load(file)
+            logging.debug('Carregando o contagem dos radicais de palavras de '+arquivo_stem_count)
+            with open(arquivo_stem_count, 'rb') as file:
+                self.stem_count = json.loads(file.read().decode('utf-8'))
         else:
             logging.debug('Calculando TF-IDF das palavras dos documentos')                    
             df = self.obter_df_documentos()
-            self.stem_count = dict()
-            self.stem_top = dict()
+            self.stem_count = dict()            
             self.vectorizer = TfidfVectorizer(
                 max_features=1500,
                 min_df=5,
@@ -78,8 +78,10 @@ class Analisador:
                 stop_words=stopwords.words('portuguese')
             ) 
             self.vectorizer.fit(df['texto'], y=df['tipo'])            
-            with open('tfidf_vectorizer.pickle', 'wb') as file:
+            with open(arquivo_vectorizer, 'wb') as file:
                 pickle.dump(self.vectorizer, file)
+            with codecs.open(arquivo_stem_count, 'wb', 'utf-8') as file:
+                file.write(json.dumps(self.stem_count))
 
     def tokenizar(self, input):
         return word_tokenize(input, language='portuguese')        
@@ -100,6 +102,7 @@ class Analisador:
         output = unidecode.unidecode(output)
 
         # faz algumas substituições para consertar palavras mal formatadas/quebradas
+        output = ' '.join(output.split()) # transforma espaços múltiplos em 1 espaço apenas antes de substituir
         for item in self.SUBSTITUIR:
             output = output.replace(item[0], item[1])
 
@@ -136,24 +139,24 @@ class Analisador:
         if word.strip().find(' ') != -1:
             return ' '.join([self.undo_stemming(w) for w in word.strip().split(' ')])
 
-        # se o stem não tiver tipo sua top palavra descoberta ainda, descobre...
-        if word not in self.stem_top:        
-            if word in self.stem_count:                
-                count = self.stem_count[word]            
-                self.stem_top[word] = max(count, key=count.get)
-            else:
-                self.stem_top[word] = word
-        
-        return self.stem_top[word]           
+        # descobre a top-palavra do stem
+        if word not in self.stem_count:
+            self.stem_count[word] = { '__top__' : word }
+        if '__top__' not in self.stem_count[word]:            
+            count = self.stem_count[word]            
+            self.stem_count[word]['__top__'] = max(count, key=count.get)            
+
+        return self.stem_count[word]['__top__']           
 
     def analisar_topicos(self):
-        '''
-        Usar LDA:
-        https://towardsdatascience.com/topic-modeling-and-latent-dirichlet-allocation-in-python-9bf156893c24
-        https://rstudio-pubs-static.s3.amazonaws.com/79360_850b2a69980c4488b1db95987a24867a.html
-        https://www.machinelearningplus.com/nlp/topic-modeling-gensim-python/
-        https://www.analyticsvidhya.com/blog/2016/08/beginners-guide-to-topic-modeling-in-python/        
-        '''
+        logging.info("Gerando modelo LDA com os documentos")
+        df = self.obter_df_documentos()
+        corpus = self.vectorizer.transform(df['texto']).toarray()
+        dictionary = gensim.corpora.Dictionary(corpus)
+        ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=5, id2word = dictionary, passes=20)
+        logging.info("Tópicos encontrados pelo LDA:")
+        for topic in ldamodel.print_topics(num_topics=5, num_words=4):
+            logging.info(topic)
 
     def tratar_frequencia(self, value):
         if math.isnan(value):
@@ -164,31 +167,44 @@ class Analisador:
     def gerar_tagclouds(self):
         self.gerar_tagcloud_tipo('compra')
         self.gerar_tagcloud_tipo('licitacao')
+    
+    def gerar_tagcloud_tipo(self, tipo):                
+        
+        freqs = self.avaliar_frequencia_de_termos(tipo)
 
-    def gerar_tagcloud_tipo(self, tipo):        
-        '''
-        https://hampao.wordpress.com/2016/04/08/building-a-wordcloud-using-a-td-idf-vectorizer-on-twitter-data/
-        '''
         logging.info('Gerando nuvem de tags para o tipo '+tipo)
-        
-        df = self.obter_df_documentos()
-        df = df[df['tipo'] == tipo]        
-        
-        tfidf_matrix = self.vectorizer.transform(df['texto'])                
-
-        freqs = { self.undo_stemming(word) : self.tratar_frequencia(tfidf_matrix.getcol(idx).sum()) for word, idx in self.vectorizer.vocabulary_.items()}
-        
-        # Imprime as TOP 20 palavras        
-        for index, (key, value) in enumerate(sorted(freqs.items(), key=lambda kv: kv[1], reverse=True)):
-            print('%d - %s (freq = %f)' % (index,key,value))            
-            if(index > 20):
-                break
-
-        # Gera o arquivo com a tagcloud
-        w = WordCloud(width=1024, height=768, mode='RGBA', background_color='white', max_words=100).fit_words(freqs)
-        plt.imshow(w)
+        w = WordCloud(width=1400, height=900, mode='RGBA', background_color='white', max_words=100, margin=1).fit_words(freqs)
+        plt.title('Nuvem de palavras de '+tipo)
+        plt.imshow(w)        
         plt.axis('off')
         plt.savefig('./out/tagcloud_'+tipo+'.png')
+
+    def avaliar_frequencia_de_termos(self, tipo):                
+
+        arquivo_freqs = './cache/freqs_'+tipo+'.json'        
+
+        if os.path.exists(arquivo_freqs):        
+            logging.info('Carregando frequência já analisadas de '+arquivo_freqs)
+            with open(arquivo_freqs, 'rb') as file:             
+                return json.loads(file.read().decode('utf-8'))                               
+        else:
+            logging.info('Analisando frequência de termos para o tipo '+tipo)
+            
+            df = self.obter_df_documentos()
+            df = df[df['tipo'] == tipo]        
+            
+            tfidf_matrix = self.vectorizer.transform(df['texto'])                
+
+            freqs = { self.undo_stemming(word) : self.tratar_frequencia(tfidf_matrix.getcol(idx).sum()) for word, idx in self.vectorizer.vocabulary_.items()}
+            
+            with codecs.open(arquivo_freqs, 'wb', 'utf-8') as file:             
+                file.write(json.dumps(freqs))            
+
+            with open('./out/termos_'+tipo+'.csv', 'w') as file:
+                for k,v in sorted(freqs.items(), key=lambda kv : kv[1], reverse=True):
+                    file.write('%s  %f\n' % (k,v))
+            
+            return freqs
 
     def obter_df_documentos(self):
         df = pd.read_sql_query("SELECT (texto_itens || texto) as texto, tipo FROM documentos", self.connection)        

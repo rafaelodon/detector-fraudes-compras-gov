@@ -35,7 +35,7 @@ class PortugueseTagger:
 
     def __preparar_tagger(self):    
 
-        nome_arquivo_tagger = 'postagger.pickle'
+        nome_arquivo_tagger = './cache/postagger.pickle'
 
         if os.path.exists(nome_arquivo_tagger):        
             logging.debug("Carregando o Pos-Tagger já treinado de "+nome_arquivo_tagger)
