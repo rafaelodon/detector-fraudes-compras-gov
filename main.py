@@ -30,9 +30,9 @@ def main():
     #tagger = PortugueseTagger()    
 
     analisador = Analisador()        
-    analisador.gerar_tagclouds()    
-    #analisador.treinar_modelo()
-    #analisador.lda()
+    #analisador.gerar_tagclouds()    
+    #analisador.treinar_modelo()    
+    analisador.analisar_topicos()
 
 
 if __name__ == "__main__":    

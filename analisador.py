@@ -149,14 +149,30 @@ class Analisador:
         return self.stem_count[word]['__top__']           
 
     def analisar_topicos(self):
-        logging.info("Gerando modelo LDA com os documentos")
-        df = self.obter_df_documentos()
-        corpus = self.vectorizer.transform(df['texto']).toarray()
-        dictionary = gensim.corpora.Dictionary(corpus)
-        ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=5, id2word = dictionary, passes=20)
+        ldamodel = None
+        arquivo_ldamodel = './cache/ldamodel.pickle'        
+        if os.path.exists(arquivo_ldamodel):
+            logging.info("Carregando modelo LDA já existente de "+arquivo_ldamodel)
+            with open(arquivo_ldamodel, 'rb') as file:
+                ldamodel = pickle.load(file)            
+        else:
+            logging.info("Vetorizando documentos")
+            df = self.obter_df_documentos()                
+            sparse = self.vectorizer.transform(df['texto'])
+            
+            logging.info("Criando corpus gensim")
+            corpus = gensim.matutils.Sparse2Corpus(sparse, documents_columns=False)        
+            dictionary = { idx : self.undo_stemming(value) for idx, value in enumerate(self.vectorizer.get_feature_names()) }
+            
+            logging.info("Gerando modelo LDA com os documentos")
+            ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=5, id2word = dictionary, passes=1)
+
+            logging.info("Gravando modelo LDA em "+arquivo_ldamodel)
+            with open(arquivo_ldamodel, 'wb') as file:
+                pickle.dump(ldamodel, file)  
+
         logging.info("Tópicos encontrados pelo LDA:")
-        for topic in ldamodel.print_topics(num_topics=5, num_words=4):
-            logging.info(topic)
+        ldamodel.print_topics(num_topics=5, num_words=4)            
 
     def tratar_frequencia(self, value):
         if math.isnan(value):
@@ -211,15 +227,7 @@ class Analisador:
         #compras = df[df['tipo'] == 'compra']
         #licitacoes = df[df['tipo'] == 'licitacao']
         #return compras.head(500).append(licitacoes.head(500))        
-        return df
-
-    def lda(self):        
-        df = pd.read_sql_query('SELECT texto FROM documentos WHERE tipo="compra"', self.connection)                
-        
-        df['texto'] = df['texto'].apply(lambda t : word_tokenize(t, language='portuguese'))
-        print(df['texto'][1])
-        
-        logging.debug("LDA")        
+        return df    
 
     def treinar_modelo(self):
         '''
