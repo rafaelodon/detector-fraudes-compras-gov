@@ -3,6 +3,7 @@
 
 import logging
 import json
+import string 
 
 from portuguese_tagger import PortugueseTagger
 from coletor import Coletor
