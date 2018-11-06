@@ -32,7 +32,8 @@ def main():
     analisador = Analisador()        
     #analisador.gerar_tagclouds()    
     #analisador.treinar_modelo()    
-    analisador.analisar_topicos()
+    #analisador.analisar_topicos()
+    analisador.identificar_padroes()
 
 
 if __name__ == "__main__":    
