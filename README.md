@@ -15,6 +15,35 @@ Fonte: API de dados abertos do ComprasNet (http://compras.dados.gov.br)
                     V              V         (modelos)  (saídas)
                  (.json)        (sqlite)         
 
+## Pré-processamento do texto
+
+Minúsculo
+
+Remover acentuação 
+
+Remover n-gramas comuns do domínio
+
+Remove unigramas numéricos
+
+Ignora espaços e pontuação tokenizando em palavras
+
+Tenta resolver problema com palavras picadas (Ex: ca pacaitacação -> capacitação, traba lho -> trabalho) fazendo uma heurística sobre a sequência de tokens. Considerando o token_i + token_i+1, se um deles tiver menos de 4 caracteres, e se a junção de ambos formar uma palavra já presente no vocabulário dos documentos, e se a frequência dessa palavra for significante, funde os tokens num novo.
+
+Faz stemming de cada token, ao mesmo tempo contabilizando as variações de palavras de cada radical encontrado afim de utilizar a top-palavra como um representante mais amigável e legível do radical nas análises seguintes.
+Ex:
+
+    "estim": {
+        "estimativas": 24,
+        "estimada": 4,
+        "estimados": 1,
+        "estimativa": 1,
+        "estimado": 3,
+        "estimadas": 1
+    },
+
+A palavra **estimativas** é a melhor representante do radical **estim** na contagem acima, e logo poderá ser usada por exemplo para representar todas as demais palavras desse radical numa nuvem de tags.
+
+
 ## Dependências
 
 * Python 3
@@ -48,3 +77,20 @@ Tópicos encontrados pelo LDA - 5 tópicos, 20 passadas, 4 palavras:
 
 5. 0.039*"arte" + 0.038*"acordo" + 0.034*"ensino" + 0.021*"cacoal"
 
+## Identificação de Padrões
+
+Fazer uma análise da ocorrência dos padrões abaixo:
+
+curso de *
+especialização em *
+mestrado em *
+doutorado em *
+graduação em *
+
+## Termos que mais agregam preço às licitações/compras
+
+## Série temporal de algum termo específico
+
+## Anotações:
+
+https://www.kaggle.com/ykhorramz/lda-and-t-sne-interactive-visualization

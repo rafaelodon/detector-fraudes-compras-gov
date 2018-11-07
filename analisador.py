@@ -12,10 +12,9 @@ import math
 import string
 import codecs
 
-from nltk.corpus import stopwords
+from nltk.corpus import stopwords, mac_morpho
 from nltk.tokenize import word_tokenize, RegexpTokenizer
 from nltk.stem import RSLPStemmer
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split  
 from sklearn.ensemble import RandomForestClassifier
@@ -36,24 +35,20 @@ class Analisador:
     REMOVER = ['pregao eletronico', 'pregao', 'aquisicao', 'valor', 'limite', 
         'licitacao', 'licitacao', 'justificativa', 'edital', 'contratacao', 'fornecimento', 
         'prestacao', 'precos', 'preco', 'formacao', 'empresa', 'servico', 'servicos',
-        'inscricao', 'pagamento', 'taxa', 'para', 'objeto']
-
-    SUBSTITUIR = [('emp resa','empresa'), ('emp  resa', 'empresa'), ('mater ial', 'material'), 
-        ('p rofissional', 'profissional'), ('traba lho', 'trabalho'),
-        ('a rtesanato', 'artesanato'), ('mater ial', 'material')]    
+        'inscricao', 'pagamento', 'taxa', 'para', 'objeto']  
 
     def __init__(self, db=None):        
         if db is None:
             self.db = 'database.db'
         
-        self.stem_count = dict()        
+        self.stem_count = dict()
+        self.word_count = dict()           
         self.connection = sqlite3.connect(self.db)        
         self.cursor = self.connection.cursor()    
         self.stemmer = RSLPStemmer()
         self.tokenizer = RegexpTokenizer(r'\w+') 
-
-        self.carregar_vectorizer()       
-        
+        self.gerar_vocabulario()
+        self.carregar_vectorizer()               
 
     def carregar_vectorizer(self):
         arquivo_vectorizer = './cache/tfidf_vectorizer.pickle'
@@ -91,7 +86,34 @@ class Analisador:
             int(str(s).strip())
             return True
         except:
-            return False
+            return False    
+
+    def gerar_vocabulario(self):           
+
+        logging.info("Gerando vocabulário a partir dos documentos.")
+        for idx, row in self.obter_df_documentos().iterrows():
+            
+            input = row['texto']
+
+            # passa para minúsculo
+            output = input.lower()
+
+            # remove acentos
+            output = unidecode.unidecode(output)
+            
+            # adiciona palavras no vocabulário            
+            for w in self.tokenizer.tokenize(output): 
+
+                #ignora tokens numéricos
+                if self.is_number(w):
+                    continue
+                
+                if w in self.word_count:
+                    self.word_count[w] += 1
+                else:
+                    self.word_count[w] = 1
+
+        logging.info("O vocabulário possui "+str(len(self.word_count))+" palavras distintas.")
 
     def pre_processar(self, input):           
 
@@ -101,23 +123,54 @@ class Analisador:
         # remove acentos
         output = unidecode.unidecode(output)
 
+        '''
         # faz algumas substituições para consertar palavras mal formatadas/quebradas
         output = ' '.join(output.split()) # transforma espaços múltiplos em 1 espaço apenas antes de substituir
         for item in self.SUBSTITUIR:
             output = output.replace(item[0], item[1])
+        '''
 
         # remove palavras muito gerais do domínio licitação/pregão/compras
         for item in self.REMOVER:
-            output = output.replace(item,'')        
+            output = output.replace(item,'')   
 
-        # faz stemming contando as palavras originais para recuperar top-palavra depois                
-        tokens = []
+        tokens = []        
         for w in self.tokenizer.tokenize(output): 
-
             #ignora tokens numéricos
             if self.is_number(w):
-                continue
-
+                continue   
+            tokens.append(w)            
+        output =  ' '.join(tokens)          
+        
+        # tenta resolver problema das palavras picadas verificando se a soma de 
+        # palavras adjacentes forma uma palavra válida
+        tokens = self.tokenizer.tokenize(output)
+        i=0
+        while i < len(tokens)-1:            
+            p1 = tokens[i]            
+            p2 = tokens[i+1]
+            pm = p1+p2
+            if((len(p1) <= 4 or len(p2) <=4) and
+                pm in self.word_count):
+                merge=False
+                try:
+                    if(self.word_count[pm] > self.word_count[p1]/2 and
+                        self.word_count[pm] > self.word_count[p2]/2):
+                        merge=True
+                except KeyError:
+                    pass
+                if merge:
+                    logging.debug("Unindo "+p1+"+"+p2)
+                    tokens[i] = ''
+                    tokens[i+1] = pm
+                    i+=1 # pula a próxima palavra pois fez parte do merge                        
+            i+=1
+             
+        output =  ' '.join(tokens)
+        
+        # faz stemmer preservando as contagens de palavras originais para recuperar a top-palavra
+        tokens = []        
+        for w in self.tokenizer.tokenize(output):            
             stem = self.stemmer.stem(w)                        
             if stem in self.stem_count:
                 if w in self.stem_count[stem]:
@@ -127,7 +180,8 @@ class Analisador:
             else:
                 self.stem_count[stem] = { w : 1 }            
             
-            tokens.append(stem)        
+            tokens.append(stem)    
+        
         output =  ' '.join(tokens)
         
         #logging.debug('['+input[:50]+'] -> ['+output[:50]+']')
@@ -165,14 +219,16 @@ class Analisador:
             dictionary = { idx : self.undo_stemming(value) for idx, value in enumerate(self.vectorizer.get_feature_names()) }
             
             logging.info("Gerando modelo LDA com os documentos")
-            ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=5, id2word = dictionary, passes=1)
+            ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=5, id2word = dictionary, passes=10, )
 
             logging.info("Gravando modelo LDA em "+arquivo_ldamodel)
             with open(arquivo_ldamodel, 'wb') as file:
                 pickle.dump(ldamodel, file)  
 
         logging.info("Tópicos encontrados pelo LDA:")
-        ldamodel.print_topics(num_topics=5, num_words=4)            
+        ldamodel.print_topics(num_topics=5, num_words=5)            
+        for i in range(ldamodel.num_topics):
+            ldamodel.show_topic(i)
 
     def tratar_frequencia(self, value):
         if math.isnan(value):
@@ -180,7 +236,7 @@ class Analisador:
         else:
             return value
 
-    def gerar_tagclouds(self):
+    def gerar_tagclouds(self):        
         self.gerar_tagcloud_tipo('compra')
         self.gerar_tagcloud_tipo('licitacao')
     
