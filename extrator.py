@@ -107,17 +107,18 @@ class Extrator():
                     if id_licitacao in self.licitaceos_analisadas:
                         logging.debug('A licitação '+id_licitacao+' já havia sido extraída')
                     else:
-                        try:
-                            
+                        valor = 0.0
+                        try:                            
                             file_itens = self.base_dir+'/itens_licitacao_'+id_licitacao+'.json' 
                             if os.path.exists(file_itens):        
                                 with open(file_itens, 'rb') as arquivo_itens:
                                     logging.debug('Exraindo texto dos itens de licitação '+file_itens)
                                     txt_itens = arquivo_itens.read().decode('utf-8')
                                     json_itens = json.loads(txt_itens)
-                                    itens = json_itens['_embedded']['itensLicitacao']
+                                    itens = json_itens['_embedded']['itensLicitacao']                                    
                                     for item in itens:
                                         texto_itens += item['descricao_item'] + '. '
+                                        valor += item['valor_estimado']
                         except KeyError:
                             pass
 
@@ -126,7 +127,7 @@ class Extrator():
                                 'arquivo' : file,                            
                                 'texto' : licitacao['objeto'],
                                 'texto_itens' : texto_itens,
-                                'valor' : 0.0,
+                                'valor' : valor,
                                 'data' : datetime.strptime(licitacao['data_entrega_proposta'], '%Y-%m-%dT%H:%M:%S'),
                                 'id_servico' : id_servico,
                                 'tipo' : 'licitacao'

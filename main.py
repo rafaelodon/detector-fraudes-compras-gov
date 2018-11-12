@@ -31,10 +31,11 @@ def main():
 
     analisador = Analisador()        
     #analisador.gerar_tagclouds()    
-    #analisador.treinar_modelo()    
+    #analisador.treinar_modelo_tipo()    
     #analisador.analisar_topicos()
     #analisador.identificar_padroes()    
-
+    #analisador.analisar_valores()
+    analisador.treinar_modelo_faixa_gasto()    
 
 
 if __name__ == "__main__":    

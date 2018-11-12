@@ -89,29 +89,37 @@ class Analisador:
             return False    
 
     def gerar_vocabulario(self):           
-
-        logging.info("Gerando vocabulário a partir dos documentos.")
-        for idx, row in self.obter_df_documentos().iterrows():
-            
-            input = row['texto']
-
-            # passa para minúsculo
-            output = input.lower()
-
-            # remove acentos
-            output = unidecode.unidecode(output)
-            
-            # adiciona palavras no vocabulário            
-            for w in self.tokenizer.tokenize(output): 
-
-                #ignora tokens numéricos
-                if self.is_number(w):
-                    continue
+        arquivo_vocabulario = './cache/word_count.json'
+        if os.path.exists(arquivo_vocabulario):
+            logging.debug('Carregando o arquivo de vocabulário de palavras de '+arquivo_vocabulario)
+            with open(arquivo_vocabulario, 'rb') as file:
+                self.word_count = json.loads(file.read().decode('utf-8'))
+        else:
+            logging.info("Gerando vocabulário a partir dos documentos.")
+            for idx, row in self.obter_df_documentos().iterrows():
                 
-                if w in self.word_count:
-                    self.word_count[w] += 1
-                else:
-                    self.word_count[w] = 1
+                input = row['texto']
+
+                # passa para minúsculo
+                output = input.lower()
+
+                # remove acentos
+                output = unidecode.unidecode(output)
+                
+                # adiciona palavras no vocabulário            
+                for w in self.tokenizer.tokenize(output): 
+
+                    #ignora tokens numéricos
+                    if self.is_number(w):
+                        continue
+                    
+                    if w in self.word_count:
+                        self.word_count[w] += 1
+                    else:
+                        self.word_count[w] = 1
+            
+            with codecs.open(arquivo_vocabulario, 'wb', 'utf-8') as file:
+                file.write(json.dumps(self.word_count))
 
         logging.info("O vocabulário possui "+str(len(self.word_count))+" palavras distintas.")
 
@@ -279,28 +287,49 @@ class Analisador:
             return freqs
 
     def obter_df_documentos(self):
-        df = pd.read_sql_query("SELECT (texto_itens || texto) as texto, tipo FROM documentos", self.connection)        
+        df = pd.read_sql_query("SELECT (texto_itens || texto) as texto, tipo, valor FROM documentos", self.connection)        
         #compras = df[df['tipo'] == 'compra']
         #licitacoes = df[df['tipo'] == 'licitacao']
         #return compras.head(500).append(licitacoes.head(500))        
         return df    
 
-    def treinar_modelo(self):
+    def treinar_modelo_tipo(self):  
         '''
-        https://stackabuse.com/text-classification-with-python-and-scikit-learn/
-        '''
+            A idéia aqui é treinar um classificador Naive Bayes no modelo Bag of Words para verificar
+            depois quais são as features com maior variância, o que dará uma pista de quais são os
+            termos mais discriminantes entre compra e licitação
+        '''      
         logging.debug('Processando documentos')    
         
-        df = self.obter_df_documentos()
+        df = pd.read_sql_query("SELECT (texto_itens || texto) as texto, tipo FROM documentos", self.connection)        
+        
         x = self.vectorizer.transform(df['texto']).toarray()
         y = df['tipo']  
 
         logging.debug("Treinando classificador Naive Bayes")
-        class2 = self.treinar_testar(GaussianNB(), x, y, 0.1)                        
+        class2 = self.treinar_testar(GaussianNB(), x, y, 0.25)                        
         self.lista_features_importantes(class2)
+        
+    def treinar_modelo_faixa_gasto(self):
+        '''
+            A idéia aqui é treinar um classificador que tenha alta revogação na faixa de preços menores,
+            e julgar os registros da faixa maior classificados como faixa menor como candidatos
+            a "compras suspeitas" (valor alto mas texto parecido com outras compras de valor menor)
+        '''
+        
+        logging.debug('Processando documentos')    
+        
+        df = pd.read_sql_query("SELECT (texto_itens || texto) as texto, tipo, valor FROM documentos WHERE valor > 0", self.connection)                    
+        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, .75, 1.] , labels=['faixa1','faixa2'])
 
-        #logging.debug("Treinando classificador Random Forest")
-        #class1 = self.treinar_testar(RandomForestClassifier(n_estimators=20, random_state=0), x, y, 0.5)
+        x = self.vectorizer.transform(df['texto']).toarray()
+        y = df['faixa_gasto']  
+
+        logging.debug("Treinando classificador Naive Bayes")
+        class2 = self.treinar_testar(GaussianNB(), x, y, 0.25)                        
+
+        logging.debug("Treinando classificador Random Forest")
+        class1 = self.treinar_testar(RandomForestClassifier(n_estimators=20, random_state=0), x, y, 0.25)
 
 
     def treinar_testar(self, classifier, x, y, split):
@@ -332,3 +361,9 @@ class Analisador:
         for index, (coef, feat) in enumerate(topn_class2):
             print('%d - %s (theta=%f)' % (index+1, self.undo_stemming(feat), coef))
         
+    def analisar_valores(self):
+
+        df = pd.read_sql_query("SELECT valor FROM documentos WHERE valor > 0", self.connection)                
+        print(pd.qcut(df['valor'], q=[0, .95, 1], retbins=True))
+        #plt.hist(df['valor'], bins=10)
+        #plt.show()

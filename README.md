@@ -79,7 +79,7 @@ Tópicos encontrados pelo LDA - 5 tópicos, 20 passadas, 4 palavras:
 
 ## Identificação de Padrões
 
-Fazer uma análise da ocorrência dos padrões abaixo:
+Fazer uma análise da ocorrência dos padrões abaixo.
 
 curso de *
 especialização em *
