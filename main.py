@@ -9,6 +9,7 @@ from portuguese_tagger import PortugueseTagger
 from coletor import Coletor
 from extrator import Extrator
 from analisador import Analisador
+from processador import Processador
 
 def main():
 
@@ -22,20 +23,22 @@ def main():
     #coletor = Coletor()        
     #coletor.coletar_compras_e_licitacoes_do_servico('17663')        
 
-    #extrator = Extrator(override=True)
+    #extrator = Extrator(override=False)
     #extrator.extrair_texto_compras_servico('17663')
     #extrator.extrair_texto_licitacoes('17663')
     #extrator.imprimir()
 
-    #tagger = PortugueseTagger()    
+    processador = Processador()
+    #processador.processar_texto()
+    processador.vetorizar()
 
-    analisador = Analisador()        
+    #analisador = Analisador()        
     #analisador.gerar_tagclouds()    
     #analisador.treinar_modelo_tipo()    
     #analisador.analisar_topicos()
     #analisador.identificar_padroes()    
     #analisador.analisar_valores()
-    analisador.treinar_modelo_faixa_gasto()    
+    #analisador.treinar_modelo_faixa_gasto()    
 
 
 if __name__ == "__main__":    

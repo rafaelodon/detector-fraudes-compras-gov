@@ -6,9 +6,7 @@ import pandas
 import sqlite3
 from datetime import datetime
 
-class Extrator():
-
-    COLUNAS = ['arquivo', 'texto', 'texto_itens' 'valor', 'data', 'id_servico', 'tipo']
+class Extrator():    
 
     def __init__(self, **kwargs):                        
         if 'base_dir' in kwargs:
@@ -33,6 +31,7 @@ class Extrator():
         self.cursor = self.connection.cursor()
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS documentos (                
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 arquivo VARCHAR(255),
                 texto TEXT CLOB,
                 texto_itens TEXT CLOB,
