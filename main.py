@@ -28,17 +28,18 @@ def main():
     #extrator.extrair_texto_licitacoes('17663')
     #extrator.imprimir()
 
-    processador = Processador()
+    #processador = Processador()
     #processador.processar_texto()
-    processador.vetorizar()
 
-    #analisador = Analisador()        
+    analisador = Analisador()        
     #analisador.gerar_tagclouds()    
     #analisador.treinar_modelo_tipo()    
     #analisador.analisar_topicos()
+
+
     #analisador.identificar_padroes()    
     #analisador.analisar_valores()
-    #analisador.treinar_modelo_faixa_gasto()    
+    analisador.treinar_modelo_faixa_gasto()    
 
 
 if __name__ == "__main__":    

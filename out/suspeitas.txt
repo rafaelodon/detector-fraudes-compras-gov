@@ -1,0 +1,8 @@
+A compra #57 de valor 7500.00 é da Faixa 3 mas parece ser da Faixa 1.
+A compra #460 de valor 6600.00 é da Faixa 2 mas parece ser da Faixa 1.
+A compra #690 de valor 7985.00 é da Faixa 3 mas parece ser da Faixa 1.
+A compra #2261 de valor 7840.00 é da Faixa 3 mas parece ser da Faixa 1.
+A compra #2369 de valor 17544.00 é da Faixa 3 mas parece ser da Faixa 1.
+A compra #2404 de valor 4250.00 é da Faixa 2 mas parece ser da Faixa 1.
+A compra #2577 de valor 7000.00 é da Faixa 2 mas parece ser da Faixa 1.
+A compra #2616 de valor 4800.00 é da Faixa 2 mas parece ser da Faixa 1.

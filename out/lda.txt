@@ -1,0 +1,2 @@
+0.033*"com" + 0.029*"curso" + 0.025*"ensino" + 0.021*"profissional" + 0.018*"acordo" + 0.017*"especializada" + 0.016*"artes" + 0.015*"capacitacao" + 0.014*"conforme" + 0.013*"area"
+0.027*"curso" + 0.021*"servidores" + 0.011*"com" + 0.007*"marinha" + 0.007*"dos" + 0.007*"material" + 0.007*"periodo" + 0.007*"capacitacao" + 0.007*"brasil" + 0.006*"especializada"

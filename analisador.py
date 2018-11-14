@@ -23,12 +23,14 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import cross_val_score
 
 import gensim 
+import pyLDAvis.gensim
 
 import matplotlib.pyplot as plt
 
 from wordcloud import WordCloud
 
 import pickle
+
 
 class Analisador:
 
@@ -39,178 +41,23 @@ class Analisador:
 
     def __init__(self, db=None):        
         if db is None:
-            self.db = 'database.db'
-        
-        self.stem_count = dict()
-        self.word_count = dict()           
+            self.db = 'database.db'                           
         self.connection = sqlite3.connect(self.db)        
-        self.cursor = self.connection.cursor()    
-        self.stemmer = RSLPStemmer()
-        self.tokenizer = RegexpTokenizer(r'\w+') 
-        self.gerar_vocabulario()
-        self.carregar_vectorizer()               
+        self.cursor = self.connection.cursor()
+        self.vectorizer = self.carregar_vectorizer()               
 
     def carregar_vectorizer(self):
         arquivo_vectorizer = './cache/tfidf_vectorizer.pickle'
-        arquivo_stem_count = './cache/stem_count.json'
-        if os.path.exists(arquivo_vectorizer) and os.path.exists(arquivo_stem_count):
+        if os.path.exists(arquivo_vectorizer):
             logging.debug('Carregando o TF-IDF Vectorizer existente de '+arquivo_vectorizer)
             with open(arquivo_vectorizer, 'rb') as file:
-                self.vectorizer = pickle.load(file)
-            logging.debug('Carregando o contagem dos radicais de palavras de '+arquivo_stem_count)
-            with open(arquivo_stem_count, 'rb') as file:
-                self.stem_count = json.loads(file.read().decode('utf-8'))
+                return pickle.load(file)
         else:
-            logging.debug('Calculando TF-IDF das palavras dos documentos')                    
-            df = self.obter_df_documentos()
-            self.stem_count = dict()            
-            self.vectorizer = TfidfVectorizer(
-                max_features=1500,
-                min_df=5,
-                max_df=0.7,
-                preprocessor=self.pre_processar,
-                #tokenizer=self.tokenizar,
-                stop_words=stopwords.words('portuguese')
-            ) 
-            self.vectorizer.fit(df['texto'], y=df['tipo'])            
-            with open(arquivo_vectorizer, 'wb') as file:
-                pickle.dump(self.vectorizer, file)
-            with codecs.open(arquivo_stem_count, 'wb', 'utf-8') as file:
-                file.write(json.dumps(self.stem_count))
-
-    def tokenizar(self, input):
-        return word_tokenize(input, language='portuguese')        
-
-    def is_number(self, s):
-        try:            
-            int(str(s).strip())
-            return True
-        except:
-            return False    
-
-    def gerar_vocabulario(self):           
-        arquivo_vocabulario = './cache/word_count.json'
-        if os.path.exists(arquivo_vocabulario):
-            logging.debug('Carregando o arquivo de vocabulário de palavras de '+arquivo_vocabulario)
-            with open(arquivo_vocabulario, 'rb') as file:
-                self.word_count = json.loads(file.read().decode('utf-8'))
-        else:
-            logging.info("Gerando vocabulário a partir dos documentos.")
-            for idx, row in self.obter_df_documentos().iterrows():
-                
-                input = row['texto']
-
-                # passa para minúsculo
-                output = input.lower()
-
-                # remove acentos
-                output = unidecode.unidecode(output)
-                
-                # adiciona palavras no vocabulário            
-                for w in self.tokenizer.tokenize(output): 
-
-                    #ignora tokens numéricos
-                    if self.is_number(w):
-                        continue
-                    
-                    if w in self.word_count:
-                        self.word_count[w] += 1
-                    else:
-                        self.word_count[w] = 1
-            
-            with codecs.open(arquivo_vocabulario, 'wb', 'utf-8') as file:
-                file.write(json.dumps(self.word_count))
-
-        logging.info("O vocabulário possui "+str(len(self.word_count))+" palavras distintas.")
-
-    def pre_processar(self, input):           
-
-        # passa para minúsculo
-        output = input.lower()
-
-        # remove acentos
-        output = unidecode.unidecode(output)
-
-        '''
-        # faz algumas substituições para consertar palavras mal formatadas/quebradas
-        output = ' '.join(output.split()) # transforma espaços múltiplos em 1 espaço apenas antes de substituir
-        for item in self.SUBSTITUIR:
-            output = output.replace(item[0], item[1])
-        '''
-
-        # remove palavras muito gerais do domínio licitação/pregão/compras
-        for item in self.REMOVER:
-            output = output.replace(item,'')   
-
-        tokens = []        
-        for w in self.tokenizer.tokenize(output): 
-            #ignora tokens numéricos
-            if self.is_number(w):
-                continue   
-            tokens.append(w)            
-        output =  ' '.join(tokens)          
-        
-        # tenta resolver problema das palavras picadas verificando se a soma de 
-        # palavras adjacentes forma uma palavra válida
-        tokens = self.tokenizer.tokenize(output)
-        i=0
-        while i < len(tokens)-1:            
-            p1 = tokens[i]            
-            p2 = tokens[i+1]
-            pm = p1+p2
-            if((len(p1) <= 4 or len(p2) <=4) and
-                pm in self.word_count):
-                merge=False
-                try:
-                    if(self.word_count[pm] > self.word_count[p1]/2 and
-                        self.word_count[pm] > self.word_count[p2]/2):
-                        merge=True
-                except KeyError:
-                    pass
-                if merge:
-                    logging.debug("Unindo "+p1+"+"+p2)
-                    tokens[i] = ''
-                    tokens[i+1] = pm
-                    i+=1 # pula a próxima palavra pois fez parte do merge                        
-            i+=1
-             
-        output =  ' '.join(tokens)
-        
-        # faz stemmer preservando as contagens de palavras originais para recuperar a top-palavra
-        tokens = []        
-        for w in self.tokenizer.tokenize(output):            
-            stem = self.stemmer.stem(w)                        
-            if stem in self.stem_count:
-                if w in self.stem_count[stem]:
-                    self.stem_count[stem][w] += 1
-                else:
-                    self.stem_count[stem][w] = 1
-            else:
-                self.stem_count[stem] = { w : 1 }            
-            
-            tokens.append(stem)    
-        
-        output =  ' '.join(tokens)
-        
-        #logging.debug('['+input[:50]+'] -> ['+output[:50]+']')
-        return output
-
-    def undo_stemming(self, word):     
-
-        # se for mais de uma palavra, chama recursivo
-        if word.strip().find(' ') != -1:
-            return ' '.join([self.undo_stemming(w) for w in word.strip().split(' ')])
-
-        # descobre a top-palavra do stem
-        if word not in self.stem_count:
-            self.stem_count[word] = { '__top__' : word }
-        if '__top__' not in self.stem_count[word]:            
-            count = self.stem_count[word]            
-            self.stem_count[word]['__top__'] = max(count, key=count.get)            
-
-        return self.stem_count[word]['__top__']           
+            logging.error("O vectorizer ainda não existe. Execute o processador.")
+            exit(1)
 
     def analisar_topicos(self):
+        '''
         ldamodel = None
         arquivo_ldamodel = './cache/ldamodel.pickle'        
         if os.path.exists(arquivo_ldamodel):
@@ -218,31 +65,32 @@ class Analisador:
             with open(arquivo_ldamodel, 'rb') as file:
                 ldamodel = pickle.load(file)            
         else:
-            logging.info("Vetorizando documentos")
-            df = self.obter_df_documentos()                
-            sparse = self.vectorizer.transform(df['texto'])
-            
-            logging.info("Criando corpus gensim")
-            corpus = gensim.matutils.Sparse2Corpus(sparse, documents_columns=False)        
-            dictionary = { idx : self.undo_stemming(value) for idx, value in enumerate(self.vectorizer.get_feature_names()) }
-            
-            logging.info("Gerando modelo LDA com os documentos")
-            ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=5, id2word = dictionary, passes=10, )
-
             logging.info("Gravando modelo LDA em "+arquivo_ldamodel)
             with open(arquivo_ldamodel, 'wb') as file:
                 pickle.dump(ldamodel, file)  
+        '''
+        logging.info("Vetorizando documentos")
+        df = pd.read_sql_query("SELECT texto_processado FROM documentos", self.connection)                            
+        
+        logging.info("Criando dicionário")            
+        
+        docs = [row.texto_processado.split() for row in df.itertuples()]            
+        dictionary = gensim.corpora.Dictionary(docs)            
+
+        logging.info("Criando corpus ")            
+        corpus = [dictionary.doc2bow(text) for text in docs]
+
+        logging.info("Gerando modelo LDA")
+        ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=2, id2word = dictionary, passes=10)        
+
+        p = pyLDAvis.gensim.prepare(ldamodel, corpus, dictionary)
+        pyLDAvis.save_html(p, './out/lda.html')
 
         logging.info("Tópicos encontrados pelo LDA:")
-        ldamodel.print_topics(num_topics=5, num_words=5)            
-        for i in range(ldamodel.num_topics):
-            ldamodel.show_topic(i)
-
-    def tratar_frequencia(self, value):
-        if math.isnan(value):
-            return 0.0
-        else:
-            return value
+        ldamodel.print_topics(num_topics=2, num_words=5)            
+        with open('./out/lda.txt', 'w') as file:            
+            for i in range(ldamodel.num_topics):
+                file.write(ldamodel.print_topic(i)+"\n")
 
     def gerar_tagclouds(self):        
         self.gerar_tagcloud_tipo('compra')
@@ -261,54 +109,45 @@ class Analisador:
 
     def avaliar_frequencia_de_termos(self, tipo):                
 
-        arquivo_freqs = './cache/freqs_'+tipo+'.json'        
+        logging.info('Analisando frequência de termos para o tipo '+tipo)
+        
+        df = pd.read_sql_query("SELECT texto_processado, tipo FROM documentos", self.connection)        
+        df = df[df['tipo'] == tipo]        
+        
+        tfidf_matrix = self.vectorizer.fit_transform(df['texto_processado'])                
+        
+        freqs = { word : tfidf_matrix.getcol(idx).sum() for word, idx in self.vectorizer.vocabulary_.items()}                     
 
-        if os.path.exists(arquivo_freqs):        
-            logging.info('Carregando frequência já analisadas de '+arquivo_freqs)
-            with open(arquivo_freqs, 'rb') as file:             
-                return json.loads(file.read().decode('utf-8'))                               
+        with open('./out/termos_'+tipo+'.md', 'w') as file:
+            file.write('| palavra | tf-idf |\n')
+            file.write('| --- | --- |\n')
+            for k,v in sorted(freqs.items(), key=lambda kv : kv[1], reverse=True):
+                file.write('| %s | %f |\n' % (k,v))
+        
+        return freqs
+
+    def tratar_frequencia(self, value):
+        if math.isnan(value):
+            return 0.0
         else:
-            logging.info('Analisando frequência de termos para o tipo '+tipo)
-            
-            df = self.obter_df_documentos()
-            df = df[df['tipo'] == tipo]        
-            
-            tfidf_matrix = self.vectorizer.transform(df['texto'])                
-
-            freqs = { self.undo_stemming(word) : self.tratar_frequencia(tfidf_matrix.getcol(idx).sum()) for word, idx in self.vectorizer.vocabulary_.items()}
-            
-            with codecs.open(arquivo_freqs, 'wb', 'utf-8') as file:             
-                file.write(json.dumps(freqs))            
-
-            with open('./out/termos_'+tipo+'.csv', 'w') as file:
-                for k,v in sorted(freqs.items(), key=lambda kv : kv[1], reverse=True):
-                    file.write('%s  %f\n' % (k,v))
-            
-            return freqs
-
-    def obter_df_documentos(self):
-        df = pd.read_sql_query("SELECT (texto_itens || texto) as texto, tipo, valor FROM documentos", self.connection)        
-        #compras = df[df['tipo'] == 'compra']
-        #licitacoes = df[df['tipo'] == 'licitacao']
-        #return compras.head(500).append(licitacoes.head(500))        
-        return df    
+            return value        
 
     def treinar_modelo_tipo(self):  
         '''
             A idéia aqui é treinar um classificador Naive Bayes no modelo Bag of Words para verificar
             depois quais são as features com maior variância, o que dará uma pista de quais são os
-            termos mais discriminantes entre compra e licitação
+            termos mais discriminantes entre compra/licitação
         '''      
         logging.debug('Processando documentos')    
         
-        df = pd.read_sql_query("SELECT (texto_itens || texto) as texto, tipo FROM documentos", self.connection)        
+        df = pd.read_sql_query("SELECT texto_processado, tipo FROM documentos", self.connection)        
         
-        x = self.vectorizer.transform(df['texto']).toarray()
+        x = self.vectorizer.transform(df['texto_processado']).toarray()
         y = df['tipo']  
 
         logging.debug("Treinando classificador Naive Bayes")
-        class2 = self.treinar_testar(GaussianNB(), x, y, 0.25)                        
-        self.lista_features_importantes(class2)
+        classificador = self.treinar_testar(GaussianNB(), x, y, 0.25)                        
+        self.lista_features_importantes(classificador)
         
     def treinar_modelo_faixa_gasto(self):
         '''
@@ -319,18 +158,31 @@ class Analisador:
         
         logging.debug('Processando documentos')    
         
-        df = pd.read_sql_query("SELECT (texto_itens || texto) as texto, tipo, valor FROM documentos WHERE valor > 0", self.connection)                    
-        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, .75, 1.] , labels=['faixa1','faixa2'])
+        df = pd.read_sql_query("SELECT id, texto_processado, valor, tipo FROM documentos WHERE valor > 0", self.connection)                    
+        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, .85, .90, .95, 1.], labels=['Faixa 1', 'Faixa 2', 'Faixa 3', 'Faixa 4'])
 
-        x = self.vectorizer.transform(df['texto']).toarray()
+        x = self.vectorizer.transform(df['texto_processado']).toarray()
         y = df['faixa_gasto']  
 
-        logging.debug("Treinando classificador Naive Bayes")
-        class2 = self.treinar_testar(GaussianNB(), x, y, 0.25)                        
+        #logging.debug("Treinando classificador Naive Bayes")
+        #class2 = self.treinar_testar(GaussianNB(), x, y, 0.25)                        
 
-        logging.debug("Treinando classificador Random Forest")
-        class1 = self.treinar_testar(RandomForestClassifier(n_estimators=20, random_state=0), x, y, 0.25)
+        logging.debug("Verificando a acurácia do classificador Random Forest")
+        classificador = RandomForestClassifier(n_estimators=100, max_depth=100, random_state=0)
+        acuracias = cross_val_score(classificador, x, y, cv=5)
+        logging.debug("Acurácias:"+str(acuracias))
+        
+        logging.debug("Ajustando classificador Random Forest com toda a base")
+        classificador.fit(x, y)
 
+        logging.debug("Classificando documentos para encontrar suspeitas")
+        with open('./out/suspeitas.txt', 'w') as file:                
+            for t in df.itertuples():
+                y = classificador.predict([x[t.Index]])            
+                if t.faixa_gasto > y[0]: 
+                    msg = "A %s #%d de valor %0.2f é da %s mas parece ser da %s." % (t.tipo, t.id, t.valor, t.faixa_gasto, y[0])
+                    print(msg)
+                    file.write(msg+'\n')
 
     def treinar_testar(self, classifier, x, y, split):
         
@@ -346,20 +198,19 @@ class Analisador:
 
         logging.debug('Acurácia: '+str(accuracy_score(y_test, y_pred)))
 
-        return classifier        
+        return classifier
 
-    def lista_features_importantes(self, classifier, n=20):
+    def lista_features_importantes(self, clas, n=20):
+        feature_names = self.vectorizer.get_feature_names()                
+        for i in range(0, len(clas.classes_)):
+            topn = sorted(zip(clas.sigma_[i], clas.theta_[i], feature_names),reverse=True)[:n]
+            logging.info("Palavras importantes em "+clas.classes_[i])
 
-        feature_names = self.vectorizer.get_feature_names()
-        topn_class1 = sorted(zip(classifier.theta_[0], feature_names),reverse=True)[:n]
-        topn_class2 = sorted(zip(classifier.theta_[1], feature_names),reverse=True)[:n]
-        logging.info("Palavras importantes em "+classifier.classes_[0])
-        for index, (coef, feat) in enumerate(topn_class1):
-            print('%d - %s (theta=%f)' % (index+1, self.undo_stemming(feat), coef))
-
-        logging.info("Palavras importantes em "+classifier.classes_[1])
-        for index, (coef, feat) in enumerate(topn_class2):
-            print('%d - %s (theta=%f)' % (index+1, self.undo_stemming(feat), coef))
+            with open('./out/features_nb_'+clas.classes_[i]+'.md', 'w') as file:
+                file.write('| ranking | palavra | sigma | theta |\n')
+                file.write('| --- | --- | --- | --- |\n')                                    
+                for index, (sigma, tetha, feat) in enumerate(topn):                    
+                    file.write('| %d | %s | %f | %f |\n' % (index+1, feat, sigma, tetha))
         
     def analisar_valores(self):
 

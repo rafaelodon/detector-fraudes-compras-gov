@@ -11,69 +11,50 @@ import os
 import math
 import string
 import codecs
+import pickle
+import constantes
 
-from nltk.corpus import stopwords, mac_morpho
-from nltk.tokenize import word_tokenize, RegexpTokenizer
+from nltk.corpus import stopwords
+from nltk.tokenize import RegexpTokenizer
 from nltk.stem import RSLPStemmer
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split  
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-from sklearn.naive_bayes import GaussianNB
-from sklearn.model_selection import cross_val_score
-
-import gensim 
-
-import matplotlib.pyplot as plt
-
-from wordcloud import WordCloud
-
-import pickle
 
 class Processador:
+    '''
+        Classe responsável por processar o texto dos documentos gravados no banco
+    '''
 
     REMOVER = ['pregao eletronico', 'pregao', 'aquisicao', 'valor', 'limite', 
         'licitacao', 'licitacao', 'justificativa', 'edital', 'contratacao', 'fornecimento', 
         'prestacao', 'precos', 'preco', 'formacao', 'empresa', 'servico', 'servicos',
         'inscricao', 'pagamento', 'taxa', 'para', 'objeto']  
 
+    SUBSTITUIR = [('emp resa', 'empresa')]
+
     def __init__(self, db=None):        
         if db is None:
-            self.db = 'database.db'
+            self.db = constantes.ARQ_BANCO
         
         self.stem_count = dict()
         self.word_count = dict()           
+        self.unidas_count = dict()
         self.connection = sqlite3.connect(self.db)        
         self.cursor = self.connection.cursor()    
         self.stemmer = RSLPStemmer()
         self.tokenizer = RegexpTokenizer(r'\w+')                
-
-    def vetorizar(self):        
-        logging.debug('Calculando TF-IDF das palavras dos documentos')                    
-        df = pd.read_sql_query("SELECT texto_processado FROM documentos", self.connection)                        
-        self.stem_count = dict()            
-        self.vectorizer = TfidfVectorizer(
-            max_features=1500,
-            min_df=5,
-            max_df=0.7,
-            preprocessor=None, # já foi processado antes
-            tokenizer=self.tokenizer.tokenize,
-            stop_words=stopwords.words('portuguese')
-        ) 
-        return self.vectorizer.fit_transform(df['texto_processado'])
-
-    def is_number(self, s):
+    
+    def __is_number(self, s):
         try:            
             int(str(s).strip())
             return True
         except:
             return False    
 
-    def gerar_vocabulario(self):           
-        arquivo_vocabulario = './cache/word_count.json'
-        if os.path.exists(arquivo_vocabulario):
-            logging.debug('Carregando o arquivo de vocabulário de palavras de '+arquivo_vocabulario)
-            with open(arquivo_vocabulario, 'rb') as file:
+    def __gerar_vocabulario(self):           
+        
+        if os.path.exists(constantes.ARQ_VOCABULARIO):
+            logging.debug('Carregando o arquivo de vocabulário de palavras de '+constantes.ARQ_VOCABULARIO)
+            with open(constantes.ARQ_VOCABULARIO, 'rb') as file:
                 self.word_count = json.loads(file.read().decode('utf-8'))
         else:
             logging.info("Gerando vocabulário a partir dos documentos.")
@@ -89,7 +70,7 @@ class Processador:
                 for w in self.tokenizer.tokenize(output): 
 
                     #ignora tokens numéricos
-                    if self.is_number(w):
+                    if self.__is_number(w):
                         continue
                     
                     if w in self.word_count:
@@ -97,12 +78,13 @@ class Processador:
                     else:
                         self.word_count[w] = 1
             
-            with codecs.open(arquivo_vocabulario, 'wb', 'utf-8') as file:
+            logging.debug("Gravando vocabulário em "+constantes.ARQ_VOCABULARIO)
+            with codecs.open(constantes.ARQ_VOCABULARIO, 'wb', 'utf-8') as file:
                 file.write(json.dumps(self.word_count))
 
         logging.info("O vocabulário possui "+str(len(self.word_count))+" palavras distintas.")
 
-    def pre_processar(self, input):           
+    def __pre_processar(self, input):           
 
         # passa para minúsculo
         output = input.lower()
@@ -110,24 +92,22 @@ class Processador:
         # remove acentos
         output = unidecode.unidecode(output)
 
-        '''
-        # faz algumas substituições para consertar palavras mal formatadas/quebradas
-        output = ' '.join(output.split()) # transforma espaços múltiplos em 1 espaço apenas antes de substituir
-        for item in self.SUBSTITUIR:
-            output = output.replace(item[0], item[1])
-        '''
+        # deixa todas as palavras separadas por 1 espaço e remove numeros
+        tokens = []        
+        for w in self.tokenizer.tokenize(output): 
+            #ignora tokens numéricos
+            if self.__is_number(w):
+                continue   
+            tokens.append(w)            
+        output =  ' '.join(tokens)
 
         # remove palavras muito gerais do domínio licitação/pregão/compras
         for item in self.REMOVER:
             output = output.replace(item,'')   
 
-        tokens = []        
-        for w in self.tokenizer.tokenize(output): 
-            #ignora tokens numéricos
-            if self.is_number(w):
-                continue   
-            tokens.append(w)            
-        output =  ' '.join(tokens)          
+        # faz alguns substituições manuais
+        for item in self.SUBSTITUIR:
+            output = output.replace(item[0], item[1])
         
         # tenta resolver problema das palavras picadas verificando se a soma de 
         # palavras adjacentes forma uma palavra válida
@@ -141,13 +121,18 @@ class Processador:
                 pm in self.word_count):
                 merge=False
                 try:
-                    if(self.word_count[pm] > self.word_count[p1]/2 and
-                        self.word_count[pm] > self.word_count[p2]/2):
+                    if(self.word_count[pm] > self.word_count[p1]/4 and
+                        self.word_count[pm] > self.word_count[p2]/4):
                         merge=True
                 except KeyError:
                     pass
                 if merge:
-                    logging.debug("Unindo "+p1+"+"+p2)
+                    unida = p1+"+"+p2                    
+                    if unida in self.unidas_count:
+                        self.unidas_count[unida] += 1
+                    else:
+                        logging.debug("Unindo "+unida)
+                        self.unidas_count[unida] = 1
                     tokens[i] = ''
                     tokens[i+1] = pm
                     i+=1 # pula a próxima palavra pois fez parte do merge                        
@@ -158,6 +143,11 @@ class Processador:
         # faz stemmer preservando as contagens de palavras originais para recuperar a top-palavra
         tokens = []        
         for w in self.tokenizer.tokenize(output):            
+
+            #pula palavras com tamanho 2 ou menos
+            if(len(w) <= 2):
+                continue
+
             stem = self.stemmer.stem(w)                        
             if stem in self.stem_count:
                 if w in self.stem_count[stem]:
@@ -174,11 +164,11 @@ class Processador:
         #logging.debug('['+input[:50]+'] -> ['+output[:50]+']')
         return output
 
-    def undo_stemming(self, word):     
+    def __undo_stemming(self, word):     
 
         # se for mais de uma palavra, chama recursivo
         if word.strip().find(' ') != -1:
-            return ' '.join([self.undo_stemming(w) for w in word.strip().split(' ')])
+            return ' '.join([self.__undo_stemming(w) for w in word.strip().split(' ')])
 
         # descobre a top-palavra do stem
         if word not in self.stem_count:
@@ -191,16 +181,16 @@ class Processador:
 
     def processar_texto(self):                
         
-        self.gerar_vocabulario()        
+        self.__gerar_vocabulario()        
 
         df = pd.read_sql_query("SELECT id, (texto_itens || texto) as texto, valor FROM documentos", self.connection)                        
         
         # pre processa o texto gerando uma sequencia de tokens com stemming
         # separados por espaço
-        df['tokens_stem'] = df['texto'].apply(lambda t:(self.pre_processar(t)))
+        df['tokens_stem'] = df['texto'].apply(lambda t:(self.__pre_processar(t)))
 
         # pre processo o texto passando cada stemming na sua top-palavra representativa        
-        df['tokens_top_palavra'] = df['tokens_stem'].apply(lambda t:(self.undo_stemming(t)))
+        df['tokens_top_palavra'] = df['tokens_stem'].apply(lambda t:(self.__undo_stemming(t)))
 
         # grava a forma final dos tokens no banco        
         try:
@@ -211,9 +201,20 @@ class Processador:
             sql = "UPDATE documentos SET texto_processado = ? WHERE id = ?"
             self.cursor.execute(sql, (row.tokens_top_palavra, row.id))            
         self.connection.commit()
+    
+        logging.debug('Calculando IDF das palavras dos documentos')                                
+        df = pd.read_sql_query("SELECT texto_processado FROM documentos", self.connection)                        
+        self.stem_count = dict()            
+        self.vectorizer = TfidfVectorizer(
+            max_features=2000,
+            min_df=0,
+            max_df=0.99,
+            preprocessor=None, # já foi processado antes e gravado no banco
+            tokenizer=self.tokenizer.tokenize,
+            stop_words=stopwords.words('portuguese')
+        ) 
+        vectorizer = self.vectorizer.fit(df['texto_processado'])
 
-    def tratar_frequencia(self, value):
-        if math.isnan(value):
-            return 0.0
-        else:
-            return value
+        logging.debug("Gravando vectorizer em "+constantes.ARQ_VECTORIZER)
+        with open(constantes.ARQ_VECTORIZER, 'wb') as file:
+            pickle.dump(vectorizer, file)        
