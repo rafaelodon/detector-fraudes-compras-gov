@@ -47,6 +47,11 @@ class Analisador:
         self.cursor = self.connection.cursor()
         self.vectorizer = self.carregar_vectorizer()               
 
+        if not os.path.exists(constantes.DIR_OUT):
+            logging.info("Criando diretório de saídas da análise "+constantes.DIR_OUT)
+            os.makedirs(constantes.DIR_OUT)
+
+
     def carregar_vectorizer(self):
         arquivo_vectorizer = constantes.ARQ_VECTORIZER
         if os.path.exists(arquivo_vectorizer):
@@ -57,24 +62,11 @@ class Analisador:
             logging.error("O vectorizer ainda não existe. Execute o processador.")
             exit(1)
 
-    def analisar_topicos(self):
-        '''
-        ldamodel = None
-        arquivo_ldamodel = './cache/ldamodel.pickle'        
-        if os.path.exists(arquivo_ldamodel):
-            logging.info("Carregando modelo LDA já existente de "+arquivo_ldamodel)
-            with open(arquivo_ldamodel, 'rb') as file:
-                ldamodel = pickle.load(file)            
-        else:
-            logging.info("Gravando modelo LDA em "+arquivo_ldamodel)
-            with open(arquivo_ldamodel, 'wb') as file:
-                pickle.dump(ldamodel, file)  
-        '''
+    def analisar_topicos(self):        
         logging.info("Vetorizando documentos")
         df = pd.read_sql_query("SELECT texto_processado FROM documentos", self.connection)                            
         
-        logging.info("Criando dicionário")            
-        
+        logging.info("Criando dicionário")                    
         docs = [row.texto_processado.split() for row in df.itertuples()]            
         dictionary = gensim.corpora.Dictionary(docs)            
 
@@ -85,11 +77,11 @@ class Analisador:
         ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=2, id2word = dictionary, passes=10)        
 
         p = pyLDAvis.gensim.prepare(ldamodel, corpus, dictionary)
-        pyLDAvis.save_html(p, './out/lda.html')
+        pyLDAvis.save_html(p, constantes.DIR_OUT+'/lda.html')
 
         logging.info("Tópicos encontrados pelo LDA:")
         ldamodel.print_topics(num_topics=2, num_words=5)            
-        with open('./out/lda.txt', 'w') as file:            
+        with open(constantes.DIR_OUT+'/lda.txt', 'w') as file:            
             for i in range(ldamodel.num_topics):
                 file.write(ldamodel.print_topic(i)+"\n")
 
@@ -109,7 +101,7 @@ class Analisador:
         plt.title('Nuvem de palavras '+categoria)
         plt.imshow(w)        
         plt.axis('off')
-        plt.savefig('./out/tagcloud_'+categoria+'.png')
+        plt.savefig(constantes.DIR_OUT+'/tagcloud_'+categoria+'.png')
 
     def avaliar_frequencia_de_termos(self, df, categoria):                
 
@@ -119,7 +111,7 @@ class Analisador:
         
         freqs = { word : tfidf_matrix.getcol(idx).sum() for word, idx in self.vectorizer.vocabulary_.items()}                     
 
-        with open('./out/termos_'+categoria+'.md', 'w') as file:
+        with open(constantes.DIR_OUT+'/termos_'+categoria+'.md', 'w') as file:
             file.write('| palavra | tf-idf |\n')
             file.write('| --- | --- |\n')
             for k,v in sorted(freqs.items(), key=lambda kv : kv[1], reverse=True):
@@ -189,7 +181,7 @@ class Analisador:
 
         logging.info("%d suspeitas encontradas. Gravando no arquivo %s " % (len(suspeitas), constantes.ARQ_SUSPEITAS))
 
-        with codecs.open(constantes.ARQ_SUSPEITAS, 'w', 'utf-8') as file:                            
+        with codecs.open(constantes.DIR_OUT+"/suspeitas.txt", 'w', 'utf-8') as file:                            
             for t in sorted(suspeitas, key=lambda s : s['valor'], reverse=True):                                    
                 link = "http://compras.dados.gov.br"
                 if t['tipo'] == 'compra':
@@ -220,7 +212,7 @@ class Analisador:
             topn = sorted(zip(clas.sigma_[i], clas.theta_[i], feature_names),reverse=True)[:n]
             logging.info("Palavras importantes em "+clas.classes_[i])
 
-            with open('./out/features_nb_'+clas.classes_[i]+'.md', 'w') as file:
+            with open(constantes.DIR_OUT+'/features_naive_bayes_'+clas.classes_[i]+'.md', 'w') as file:
                 file.write('| ranking | palavra | sigma | theta |\n')
                 file.write('| --- | --- | --- | --- |\n')                                    
                 for index, (sigma, tetha, feat) in enumerate(topn):                    
@@ -231,18 +223,38 @@ class Analisador:
         df = pd.read_sql_query("SELECT tipo, valor FROM documentos WHERE valor > 0", self.connection)
         pd.options.display.float_format = '{:.2f}'.format        
         
+        vmin = df['valor'].min()        
+        vmax = df['valor'].max()                
+        vmean = df['valor'].mean()
+        vstd = df['valor'].std()
+
         plt.style.use('seaborn')
-        plt.figure(figsize=(6,4))
-        plt.hist(df['valor'], bins=15, log=True, normed=True, rwidth=0.8)                
-        plt.xticks(rotation=30)        
-        plt.grid(axis='x')                
-        plt.ylabel('Quantidade de compras')        
-        plt.xlabel('Gasto em reais')        
-        plt.title('Histograma dos valores das compras')      
-        plt.tight_layout()        
-        plt.savefig('./out/histograma_valores.png')      
         
-        percentis = df['valor'].describe(percentiles=[x/100 for x in range(90, 101)])
-        with open('./out/percentis.md', 'w') as file:                        
+        plt.figure(figsize=(8,4))
+        df['valor'].plot(kind='bar', bins=100, rwidth=0.8)                
+        #plt.xticks(range(int(vmin), int(vmax), int((vmax-vmin)/20.0)), rotation=30)        
+        #plt.grid(axis='x')                
+        #plt.ylabel('Quantidade de compras')        
+        #plt.xlabel('Gasto em reais')        
+        #plt.title('Histograma dos valores das compras')      
+        plt.tight_layout()        
+        #plt.savefig(constantes.DIR_OUT+'/histograma_valores.png')      
+        plt.show()
+
+        '''
+        plt.figure(figsize=(8,4))
+        plt.plot(df['valor'])                
+        #plt.xticks(range(int(vmin), int(vmax), int((vmax-vmin)/20.0)), rotation=30)        
+        plt.grid(axis='x')          
+        plt.xlabel('Gasto em reais')                    
+        plt.title('Distribuição dos Valores das Compras')      
+        plt.tight_layout()        
+        plt.savefig(constantes.DIR_OUT+'/distribuicao.png')      
+        
+        percentis = df['valor'].describe(percentiles=[x/100 for x in range(0, 101)])
+        with open(constantes.DIR_OUT+'/percentis.md', 'w') as file:                        
+            file.write("| descritiva | valor |\n")
+            file.write("| --- | --- |\n")
             for i,p in percentis.items():
                 file.write("| %s | %d |\n" % (i,p))
+        '''

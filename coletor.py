@@ -20,9 +20,9 @@ class Coletor:
     def set_modo_offline(self):
         self.modo_offline = True
 
-    def coletar_compras_e_licitacoes_do_servico(self, id_servico):
-        self.__coletar_compras_do_servico(id_servico)
-        self.__coletar_licitacoes_do_servico(id_servico)
+    def coletar_compras_e_licitacoes(self):
+        self.__coletar_compras_do_servico(constantes.ID_SERVICO)
+        self.__coletar_licitacoes_do_servico(constantes.ID_SERVICO)
 
         logging.info(str(self.qtd_compras) + " compras coletadas.")
         logging.info(str(self.qtd_licitacoes) + " licitações coletadas.")

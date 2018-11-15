@@ -29,6 +29,29 @@ Ignora espaços e pontuação tokenizando em palavras
 
 Tenta resolver problema com palavras picadas (Ex: ca pacaitacação -> capacitação, traba lho -> trabalho) fazendo uma heurística sobre a sequência de tokens. Considerando o token_i + token_i+1, se um deles tiver menos de 4 caracteres, e se a junção de ambos formar uma palavra já presente no vocabulário dos documentos, e se a frequência dessa palavra for significante, funde os tokens num novo.
 
+Exemplos de uniões de palavras que aconteceram durante o processamento:
+
+    ...
+    2018-11-15 10:44:11,072 [DEBUG] - Unindo crit+erio
+    2018-11-15 10:44:11,073 [DEBUG] - Unindo maqu+ina
+    2018-11-15 10:44:11,099 [DEBUG] - Unindo mentori+ng
+    2018-11-15 10:44:11,102 [DEBUG] - Unindo minis+trar
+    2018-11-15 10:44:11,109 [DEBUG] - Unindo mer+cado
+    2018-11-15 10:44:11,109 [DEBUG] - Unindo doce+ntes
+    2018-11-15 10:44:11,109 [DEBUG] - Unindo integr+ada
+    2018-11-15 10:44:11,109 [DEBUG] - Unindo oite+nta
+    2018-11-15 10:44:11,126 [DEBUG] - Unindo univ+ersitaria
+    2018-11-15 10:44:11,130 [DEBUG] - Unindo tra+nsferencia
+    2018-11-15 10:44:11,132 [DEBUG] - Unindo amb+iente
+    2018-11-15 10:44:11,137 [DEBUG] - Unindo enc+adernacao
+    2018-11-15 10:44:11,142 [DEBUG] - Unindo w+indows
+    2018-11-15 10:44:11,144 [DEBUG] - Unindo execut+iva
+    2018-11-15 10:44:11,149 [DEBUG] - Unindo f+ormacao
+    2018-11-15 10:44:11,152 [DEBUG] - Unindo vi+deo
+    2018-11-15 10:44:11,163 [DEBUG] - Unindo te+cnicos
+    ...
+
+
 Faz stemming de cada token, ao mesmo tempo contabilizando as variações de palavras de cada radical encontrado afim de utilizar a top-palavra como um representante mais amigável e legível do radical nas análises seguintes.
 Ex:
 

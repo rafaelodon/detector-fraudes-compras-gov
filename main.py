@@ -4,6 +4,7 @@
 import logging
 import json
 import string 
+import constantes
 
 from portuguese_tagger import PortugueseTagger
 from coletor import Coletor
@@ -19,23 +20,21 @@ def main():
     )
 
     logging.debug("Iniciando")
-    
-    #coletor = Coletor()        
-    #coletor.coletar_compras_e_licitacoes_do_servico('17663')        
+
+    #coletor = Coletor()                
+    #coletor.coletar_compras_e_licitacoes()
 
     #extrator = Extrator(override=True)
-    #extrator.extrair_texto_compras_servico('17663')
-    #extrator.extrair_texto_licitacoes('17663')
-    #extrator.imprimir()
+    #extrator.extrair_texto_compras_licitacoes()        
 
-    processador = Processador()
-    processador.processar_texto()
+    #processador = Processador()
+    #processador.processar_texto()    
 
-    #analisador = Analisador()        
+    analisador = Analisador()      
+    analisador.analisar_valores()
     #analisador.gerar_tagclouds()    
     #analisador.treinar_modelo_tipo()    
-    #analisador.analisar_topicos()
-    #analisador.analisar_valores()
+    #analisador.analisar_topicos()    
     #analisador.treinar_modelo_faixa_gasto()    
     
 if __name__ == "__main__":    

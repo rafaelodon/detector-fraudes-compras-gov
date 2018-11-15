@@ -51,13 +51,12 @@ class Extrator():
         self.compras_analisadas = dict()
         self.licitacoes_analisadas = dict()
 
-    def gravar_documento(self, doc):
-        if self.override:
-            sql = '''INSERT INTO documentos (arquivo, texto, texto_itens, valor, data, id_servico, id_compra_licitacao, tipo) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)'''
-            self.cursor.execute(sql, (doc['arquivo'], doc['texto'], doc['texto_itens'], doc['valor'], doc['data'], doc['id_servico'], doc['id_compra_licitacao'], doc['tipo']))                    
+    def __gravar_documento(self, doc):        
+        sql = '''INSERT INTO documentos (arquivo, texto, texto_itens, valor, data, id_servico, id_compra_licitacao, tipo) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)'''
+        self.cursor.execute(sql, (doc['arquivo'], doc['texto'], doc['texto_itens'], doc['valor'], doc['data'], doc['id_servico'], doc['id_compra_licitacao'], doc['tipo']))                    
 
-    def extrair_texto_compras_servico(self, id_servico):
+    def __extrair_texto_compras_servico(self, id_servico):
         for file in glob.glob(self.base_dir+'/compras_servico'+id_servico+'*.json'):
             with open(file, 'rb') as arquivo:
                 logging.debug('Extraindo texto das compras do arquivo '+file)
@@ -85,7 +84,7 @@ class Extrator():
                             pass
 
                         try:              
-                            self.gravar_documento({
+                            self.__gravar_documento({
                                 'arquivo' : file,                            
                                 'texto' : compra['ds_objeto_licitacao'] + compra['ds_justificativa'],
                                 'texto_itens' : texto_itens,
@@ -99,7 +98,7 @@ class Extrator():
                             pass
             self.connection.commit()
 
-    def extrair_texto_licitacoes(self, id_servico):
+    def __extrair_texto_licitacoes_servico(self, id_servico):
         for file in glob.glob(self.base_dir+'/licitacoes_servico'+id_servico+'*.json'):
             with open(file, 'rb') as arquivo:
                 logging.debug('Extraindo texto das licitações do arquivo '+file)
@@ -129,7 +128,7 @@ class Extrator():
                             pass
 
                         try:                        
-                            self.gravar_documento({
+                            self.__gravar_documento({
                                 'arquivo' : file,                            
                                 'texto' : licitacao['objeto'],
                                 'texto_itens' : texto_itens,
@@ -143,10 +142,10 @@ class Extrator():
                             pass
             self.connection.commit()
 
-    def imprimir(self):
+    def extrair_texto_compras_licitacoes(self):
+        self.__extrair_texto_compras_servico(constantes.ID_SERVICO)
+        self.__extrair_texto_licitacoes_servico(constantes.ID_SERVICO)
+
+        logging.info("Quantidades de registros gerados pela extração: ")
         for row in self.cursor.execute('SELECT tipo, count(*) FROM documentos GROUP BY tipo'):
             logging.debug(row)
-
-    def fechar(self):        
-        self.connection.commit()
-        self.connection.close()

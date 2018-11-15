@@ -59,7 +59,7 @@ class Processador:
         else:
             logging.info("Gerando vocabulário a partir dos documentos.")
             df = pd.read_sql_query("SELECT (texto_itens || texto) as texto FROM documentos", self.connection)                        
-            for idx, row in df.itertuples():
+            for row in df.itertuples():
                 
                 input = row.texto
 
@@ -183,7 +183,7 @@ class Processador:
         
         self.__gerar_vocabulario()        
 
-        df = pd.read_sql_query("SELECT id, (texto_itens || texto) as texto, valor FROM documentos", self.connection)                        
+        df = pd.read_sql_query("SELECT id, (texto_itens || texto) as texto, valor FROM documentos", self.connection)
         
         # pre processa o texto gerando uma sequencia de tokens com stemming
         # separados por espaço
