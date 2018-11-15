@@ -1,2 +1,2 @@
-0.033*"com" + 0.029*"curso" + 0.025*"ensino" + 0.021*"profissional" + 0.018*"acordo" + 0.017*"especializada" + 0.016*"artes" + 0.015*"capacitacao" + 0.014*"conforme" + 0.013*"area"
-0.027*"curso" + 0.021*"servidores" + 0.011*"com" + 0.007*"marinha" + 0.007*"dos" + 0.007*"material" + 0.007*"periodo" + 0.007*"capacitacao" + 0.007*"brasil" + 0.006*"especializada"
+0.032*"curso" + 0.017*"servidores" + 0.016*"com" + 0.009*"especializada" + 0.007*"capacitacao" + 0.007*"empresa" + 0.007*"material" + 0.007*"periodo" + 0.007*"conforme" + 0.006*"atender"
+0.022*"servidores" + 0.021*"curso" + 0.010*"dos" + 0.010*"com" + 0.008*"periodo" + 0.007*"material" + 0.007*"realizado" + 0.007*"conforme" + 0.007*"estabelecido" + 0.006*"atender"

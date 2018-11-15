@@ -6,6 +6,7 @@ import os
 import codecs
 from urllib.request import urlopen
 import json
+import constantes
 
 class Coletor:
    
@@ -14,14 +15,10 @@ class Coletor:
         self.qtd_compras = 0
         self.qtd_licitacoes = 0
         self.qtd_itens_compra = 0
-        self.qtd_itens_licitacao = 0
-        self.cache_dir = './cache'
+        self.qtd_itens_licitacao = 0        
 
     def set_modo_offline(self):
         self.modo_offline = True
-
-    def set_cache_dir(self, cache_dir):
-        self.cache_dir = cache_dir
 
     def coletar_compras_e_licitacoes_do_servico(self, id_servico):
         self.__coletar_compras_do_servico(id_servico)
@@ -83,11 +80,11 @@ class Coletor:
     
     def __buscar_com_cache(self, url, nome_arquivo_cache):
         data = ''        
-        if not os.path.exists(self.cache_dir):
+        if not os.path.exists(constantes.DIR_CACHE):
             logging.debug('Criando o diretório de cache')
-            os.makedirs(self.cache_dir)
+            os.makedirs(constantes.DIR_CACHE)
 
-        caminho_arquivo_cache = self.cache_dir+'/'+nome_arquivo_cache
+        caminho_arquivo_cache = constantes.DIR_CACHE+'/'+nome_arquivo_cache
         if os.path.exists(caminho_arquivo_cache):        
             with open(caminho_arquivo_cache, 'rb') as arquivo:
                 logging.debug('Recuperando resposta em cache '+nome_arquivo_cache)

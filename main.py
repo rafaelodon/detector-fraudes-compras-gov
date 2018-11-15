@@ -23,7 +23,7 @@ def main():
     #coletor = Coletor()        
     #coletor.coletar_compras_e_licitacoes_do_servico('17663')        
 
-    #extrator = Extrator(override=False)
+    #extrator = Extrator(override=True)
     #extrator.extrair_texto_compras_servico('17663')
     #extrator.extrair_texto_licitacoes('17663')
     #extrator.imprimir()
@@ -35,12 +35,8 @@ def main():
     #analisador.gerar_tagclouds()    
     #analisador.treinar_modelo_tipo()    
     #analisador.analisar_topicos()
-
-
-    #analisador.identificar_padroes()    
     #analisador.analisar_valores()
     analisador.treinar_modelo_faixa_gasto()    
-
-
+    
 if __name__ == "__main__":    
     main()

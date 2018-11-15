@@ -4,6 +4,7 @@ import logging
 import json
 import pandas
 import sqlite3
+import constantes
 from datetime import datetime
 
 class Extrator():    
@@ -12,23 +13,28 @@ class Extrator():
         if 'base_dir' in kwargs:
             self.base_dir = kwargs['base_dir']
         else:
-            self.base_dir = './cache'        
+            self.base_dir = constantes.DIR_CACHE
 
         if 'db' in kwargs:
             self.db = kwargs['db']
         else:
-            self.db = 'database.db'
+            self.db = constantes.ARQ_BANCO
         
         if 'override' in kwargs:
             self.override = kwargs['override']
         else:
             self.override = False
 
-        self.compras_analisadas = dict()
-        self.licitaceos_analisadas = dict()
+        if not os.path.exists(constantes.DIR_DATA):
+            os.mkdir(constantes.DIR_DATA)
+
+        if self.override:   
+            logging.debug('Apagando banco de dados anterior.')                     
+            if os.path.exists(constantes.ARQ_BANCO):
+                os.remove(constantes.ARQ_BANCO)            
 
         self.connection = sqlite3.connect(self.db)        
-        self.cursor = self.connection.cursor()
+        self.cursor = self.connection.cursor()        
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS documentos (                
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,19 +44,18 @@ class Extrator():
                 valor DOUBLE,
                 data DATE,
                 id_servico VARCHAR(10),
-                tipo VARCHAR(10)              
-            );''')
-
-        if self.override:   
-            logging.debug('Apagando registros da tabela documentos.')         
-            self.cursor.execute('DELETE FROM documentos')
-            self.connection.commit()
+                id_compra_licitacao VARCHAR(100),
+                tipo VARCHAR(10)                              
+            );''')            
+        
+        self.compras_analisadas = dict()
+        self.licitacoes_analisadas = dict()
 
     def gravar_documento(self, doc):
         if self.override:
-            sql = '''INSERT INTO documentos (arquivo, texto, texto_itens, valor, data, id_servico, tipo) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)'''
-            self.cursor.execute(sql, (doc['arquivo'], doc['texto'], doc['texto_itens'], doc['valor'], doc['data'], doc['id_servico'], doc['tipo']))                    
+            sql = '''INSERT INTO documentos (arquivo, texto, texto_itens, valor, data, id_servico, id_compra_licitacao, tipo) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (doc['arquivo'], doc['texto'], doc['texto_itens'], doc['valor'], doc['data'], doc['id_servico'], doc['id_compra_licitacao'], doc['tipo']))                    
 
     def extrair_texto_compras_servico(self, id_servico):
         for file in glob.glob(self.base_dir+'/compras_servico'+id_servico+'*.json'):
@@ -87,6 +92,7 @@ class Extrator():
                                 'valor' : float(compra['vr_estimado']),
                                 'data' : datetime.strptime(compra['dtDeclaracaoDispensa'], '%Y-%m-%dT%H:%M:%S'),
                                 'id_servico' : id_servico,
+                                'id_compra_licitacao' : id_compra,
                                 'tipo' : 'compra'
                             })
                         except KeyError:
@@ -103,9 +109,10 @@ class Extrator():
                 for licitacao in licitacoes:                    
                     texto_itens = ''
                     id_licitacao = licitacao['_links']['self']['href'].split('/')[4]                        
-                    if id_licitacao in self.licitaceos_analisadas:
+                    if id_licitacao in self.licitacoes_analisadas:
                         logging.debug('A licitação '+id_licitacao+' já havia sido extraída')
                     else:
+                        self.licitacoes_analisadas[id_licitacao] = True
                         valor = 0.0
                         try:                            
                             file_itens = self.base_dir+'/itens_licitacao_'+id_licitacao+'.json' 
@@ -129,6 +136,7 @@ class Extrator():
                                 'valor' : valor,
                                 'data' : datetime.strptime(licitacao['data_entrega_proposta'], '%Y-%m-%dT%H:%M:%S'),
                                 'id_servico' : id_servico,
+                                'id_compra_licitacao' : id_licitacao,
                                 'tipo' : 'licitacao'
                             })
                         except KeyError:
@@ -142,6 +150,3 @@ class Extrator():
     def fechar(self):        
         self.connection.commit()
         self.connection.close()
-
-
-

@@ -11,6 +11,7 @@ import os
 import math
 import string
 import codecs
+import constantes
 
 from nltk.corpus import stopwords, mac_morpho
 from nltk.tokenize import word_tokenize, RegexpTokenizer
@@ -41,13 +42,13 @@ class Analisador:
 
     def __init__(self, db=None):        
         if db is None:
-            self.db = 'database.db'                           
+            self.db = constantes.ARQ_BANCO
         self.connection = sqlite3.connect(self.db)        
         self.cursor = self.connection.cursor()
         self.vectorizer = self.carregar_vectorizer()               
 
     def carregar_vectorizer(self):
-        arquivo_vectorizer = './cache/tfidf_vectorizer.pickle'
+        arquivo_vectorizer = constantes.ARQ_VECTORIZER
         if os.path.exists(arquivo_vectorizer):
             logging.debug('Carregando o TF-IDF Vectorizer existente de '+arquivo_vectorizer)
             with open(arquivo_vectorizer, 'rb') as file:
@@ -158,32 +159,45 @@ class Analisador:
         
         logging.debug('Processando documentos')    
         
-        df = pd.read_sql_query("SELECT id, texto_processado, valor, tipo FROM documentos WHERE valor > 0", self.connection)                    
-        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, .85, .90, .95, 1.], labels=['Faixa 1', 'Faixa 2', 'Faixa 3', 'Faixa 4'])
+        df = pd.read_sql_query("SELECT id, id_compra_licitacao, texto_processado, valor, tipo FROM documentos WHERE valor > 0", self.connection)                    
+        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, .90, .95, 1.], labels=['Faixa 1', 'Faixa 2', 'Faixa 3'])
 
         x = self.vectorizer.transform(df['texto_processado']).toarray()
         y = df['faixa_gasto']  
 
-        #logging.debug("Treinando classificador Naive Bayes")
-        #class2 = self.treinar_testar(GaussianNB(), x, y, 0.25)                        
-
         logging.debug("Verificando a acurácia do classificador Random Forest")
-        classificador = RandomForestClassifier(n_estimators=100, max_depth=100, random_state=0)
+        classificador = RandomForestClassifier(n_estimators=50, max_depth=50, random_state=0)
         acuracias = cross_val_score(classificador, x, y, cv=5)
-        logging.debug("Acurácias:"+str(acuracias))
-        
+        logging.debug("Acurácias:"+str(acuracias))        
+
         logging.debug("Ajustando classificador Random Forest com toda a base")
         classificador.fit(x, y)
 
         logging.debug("Classificando documentos para encontrar suspeitas")
-        with open('./out/suspeitas.txt', 'w') as file:                
-            for t in df.itertuples():
-                y = classificador.predict([x[t.Index]])            
-                if t.faixa_gasto > y[0]: 
-                    msg = "A %s #%d de valor %0.2f é da %s mas parece ser da %s." % (t.tipo, t.id, t.valor, t.faixa_gasto, y[0])
-                    print(msg)
-                    file.write(msg+'\n')
+        suspeitas = []        
+        for t in df.itertuples():
+            y = classificador.predict([x[t.Index]])            
+            if t.faixa_gasto > y[0]:                                                 
+                suspeitas.append({
+                    "tipo" : t.tipo,
+                    "id" : t.id,
+                    "valor" : t.valor,
+                    "faixa_banco" : t.faixa_gasto,
+                    "faixa_predita" : y[0],
+                    'id_compra_licitacao' : t.id_compra_licitacao
+                })
 
+        logging.info("%d suspeitas encontradas. Gravando no arquivo %s " % (len(suspeitas), constantes.ARQ_SUSPEITAS))
+
+        with codecs.open(constantes.ARQ_SUSPEITAS, 'w', 'utf-8') as file:                            
+            for t in sorted(suspeitas, key=lambda s : s['valor'], reverse=True):                                    
+                link = "http://compras.dados.gov.br"
+                if t['tipo'] == 'compra':
+                    link += "/compraSemLicitacao/doc/compra_slicitacao/" + t['id_compra_licitacao']
+                else:
+                    link += "/licitacoes/doc/licitacao/" + t['id_compra_licitacao']
+                file.write("A %s #%d de valor %0.2f é da %s mas parece ser da %s. (%s)\n" % (t['tipo'], t['id'], t['valor'], t['faixa_banco'], t['faixa_predita'], link))
+    
     def treinar_testar(self, classifier, x, y, split):
         
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=split, random_state=0)  
