@@ -1,3 +1,3 @@
-0.019*"com" + 0.016*"ald" + 0.015*"ate" + 0.014*"transporte" + 0.007*"00campinapolis" + 0.007*"sta" + 0.007*"atender" + 0.006*"passagens" + 0.005*"indigenas" + 0.005*"conforme"
-0.019*"com" + 0.017*"transporte" + 0.015*"frete" + 0.012*"atender" + 0.008*"memo" + 0.006*"indigenas" + 0.005*"percurso" + 0.005*"por" + 0.004*"veiculos" + 0.004*"conforme"
-0.029*"frete" + 0.028*"transporte" + 0.024*"aldeia" + 0.019*"memo" + 0.015*"com" + 0.011*"indios" + 0.011*"barra" + 0.010*"percurso" + 0.010*"materiais" + 0.008*"veiculos"
+0.034*"transporte" + 0.026*"com" + 0.019*"frete" + 0.016*"aldeia" + 0.011*"indigenas" + 0.008*"atender" + 0.008*"barra" + 0.008*"memo" + 0.007*"materiais" + 0.007*"dos"
+0.027*"frete" + 0.018*"memo" + 0.016*"com" + 0.015*"transporte" + 0.011*"aldeia" + 0.011*"anexo" + 0.010*"conforme" + 0.009*"percurso" + 0.009*"aerbgs" + 0.008*"barra"
+0.029*"transporte" + 0.013*"com" + 0.013*"memo" + 0.013*"ate" + 0.012*"aldeia" + 0.012*"frete" + 0.011*"ald" + 0.009*"materiais" + 0.009*"indios" + 0.008*"veiculos"

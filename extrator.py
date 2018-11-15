@@ -5,6 +5,8 @@ import json
 import pandas
 import sqlite3
 import constantes
+import parsel
+import pickle
 from datetime import datetime
 
 class Extrator():    
@@ -46,6 +48,14 @@ class Extrator():
                 id_servico VARCHAR(10),
                 id_compra_licitacao VARCHAR(100),
                 tipo VARCHAR(10)                              
+            );''')            
+                
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS selic (                
+                id INTEGER PRIMARY KEY AUTOINCREMENT,                
+                data_inicio DATE,
+                data_fim DATE,
+                valor DOUBLE                                
             );''')            
         
         self.compras_analisadas = dict()
@@ -149,3 +159,33 @@ class Extrator():
         logging.info("Quantidades de registros gerados pela extração: ")
         for row in self.cursor.execute('SELECT tipo, count(*) FROM documentos GROUP BY tipo'):
             logging.debug(row)
+
+    def extrair_historico_selic(self):
+        
+        with open(constantes.DIR_CACHE+'/selic.html', 'rb') as file:
+            html = file.read().decode('utf-8')
+
+            logging.info("Apagando registros anteriores da SELIC")
+            self.cursor.execute('DELETE FROM selic')
+            self.connection.commit()
+
+            sel = parsel.Selector(html)
+            datas = sel.xpath('//html/body/div[2]/div[3]/table//tr/td[position()=4]/text()').getall()
+            taxas = sel.xpath('//html/body/div[2]/div[3]/table//tr/td[position()=7]/text()').getall()
+            selic = []
+            i = 0                                
+            while i < len(datas) and i < len(taxas):
+                data = datas[i].strip()
+                taxa = taxas[i].strip()                
+                i += 1
+                if data == '' or taxa == '':                    
+                    continue
+                else:                    
+                    logging.debug('Taxa selic encontrada: %s - %s' % (data, taxa) )
+                    data_inicio = datetime.strptime(data.split(' - ')[0], '%d/%m/%Y')
+                    data_fim = datetime.strptime(data.split(' - ')[1], '%d/%m/%Y')                    
+                    taxa = float(taxa.replace(',','.'))                    
+                    self.cursor.execute('INSERT INTO selic (data_inicio, data_fim, valor) VALUES (?, ?, ?)', (data_inicio, data_fim, taxa))            
+            
+            logging.info("Gravando registros novos da SELIC")
+            self.connection.commit()

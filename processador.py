@@ -218,3 +218,24 @@ class Processador:
         logging.debug("Gravando vectorizer em "+constantes.ARQ_VECTORIZER)
         with open(constantes.ARQ_VECTORIZER, 'wb') as file:
             pickle.dump(vectorizer, file)        
+
+    def atualizar_valores_com_selic(self):
+
+        logging.info("Atualizando valores das compras com a SELIC")
+        
+        try:
+            self.cursor.execute("ALTER TABLE documentos ADD COLUMN valor_atualizado DOUBLE;")
+        except sqlite3.OperationalError:
+            logging.debug("A coluna valor_atualizado já existe.")                                
+
+        df1 = pd.read_sql_query("SELECT id, data, valor FROM documentos", self.connection)                        
+        for compra in df1.itertuples():
+            df2 = pd.read_sql_query("SELECT valor FROM selic WHERE data_inicio >= ? ORDER BY data_inicio", self.connection, params=[compra.data])                        
+            valor_ajustado = compra.valor
+            for selic in df2.itertuples():
+                valor_ajustado = valor_ajustado * (1+(selic.valor/100))
+            logging.debug("Atualizou de %.2f para %.2f" % (compra.valor, valor_ajustado))                   
+            self.cursor.execute("UPDATE documentos SET valor_atualizado = ? WHERE id = ?", (valor_ajustado, compra.id))                        
+        self.connection.commit()
+        
+        

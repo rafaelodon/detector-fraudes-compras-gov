@@ -1,14 +1,7 @@
 Classificador Random Forest com 10 estimadores e profundidade máxima 50.
 Classes: 
- * Faixa 1 (gasto até 25924.02) - 932 registros.
- * Faixa 2 (acima de 25924.02) - 79 registros.
-Acurácias obtidas na validação cruzada com 5 folds: 0.9211822660098522%, 0.9408866995073891%, 0.9356435643564357%, 0.9356435643564357%, 0.9353233830845771%
-Foram encontrada 7 suspeitas.
+ * Faixa 1 (gasto até 247368.04) - 1982 registros.
+ * Faixa 2 (acima de 247368.04) - 40 registros.
+Acurácias obtidas na validação cruzada com 5 folds: 0.9925925925925926%, 0.9950617283950617%, 0.995049504950495%, 0.995049504950495%, 0.9975247524752475%
+Foram encontrada 0 suspeitas.
 
-A licitacao #1725 de valor 518490.00 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/25001502000012002)
-A licitacao #1723 de valor 363200.00 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/25002902000012001)
-A compra #490 de valor 146952.60 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/25300206000052001)
-A licitacao #1793 de valor 35400.00 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/15312401000022004)
-A licitacao #1614 de valor 29927.04 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/15323305000062005)
-A licitacao #1531 de valor 27000.00 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/15312401000042004)
-A licitacao #1538 de valor 26400.00 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/16046801000042006)

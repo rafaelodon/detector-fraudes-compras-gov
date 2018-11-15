@@ -41,8 +41,8 @@
 | 99% | 120639 |
 | max | 2037000 |
 
-O corte da Faixa 1 e Faixa 2 será no percentil 91.573237.
+O corte da Faixa 1 e Faixa 2 será no percentil 98.191682.
 
-Quantidade de registros na Faixa 1): 5064.
+Quantidade de registros na Faixa 1): 5430.
 
-Quantidade de registros na Faixa 2): 466.
+Quantidade de registros na Faixa 2): 100.

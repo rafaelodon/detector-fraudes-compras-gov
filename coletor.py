@@ -21,9 +21,7 @@ class Coletor:
         self.modo_offline = True
 
     def coletar_historico_selic(self):
-        url = "https://www.bcb.gov.br/pec/copom/port/taxaselic.asp"
-        arquivo = constantes.DIR_CACHE + "/selic.html"
-        self.__buscar_com_cache(url, arquivo)
+        self.__buscar_com_cache("https://www.bcb.gov.br/pec/copom/port/taxaselic.asp", "selic.html", 'ISO-8859-1')
 
     def coletar_compras_e_licitacoes(self):
         self.__coletar_compras_do_servico(constantes.ID_SERVICO)
@@ -83,7 +81,7 @@ class Coletor:
                 except KeyError:            
                     break
     
-    def __buscar_com_cache(self, url, nome_arquivo_cache):
+    def __buscar_com_cache(self, url, nome_arquivo_cache, encoding='utf-8'):
         data = ''        
         if not os.path.exists(constantes.DIR_CACHE):
             logging.debug('Criando o diretório de cache')
@@ -93,11 +91,11 @@ class Coletor:
         if os.path.exists(caminho_arquivo_cache):        
             with open(caminho_arquivo_cache, 'rb') as arquivo:
                 logging.debug('Recuperando resposta em cache '+nome_arquivo_cache)
-                data = arquivo.read().decode('utf-8')
+                data = arquivo.read().decode(encoding)
         else:        
             if not self.modo_offline:
                 response = urlopen(url)
-                data = response.read().decode('utf-8')
+                data = response.read().decode(encoding)
                 with codecs.open(caminho_arquivo_cache, 'w', 'utf-8') as arquivo:
                     logging.debug('Gravando resposta em cache '+nome_arquivo_cache)            
                     arquivo.write(data)     

@@ -160,7 +160,7 @@ class Analisador:
 
     def obter_df_texto_faixa_gasto(self):        
         df = pd.read_sql_query("SELECT id, id_compra_licitacao, texto_processado, valor, tipo FROM documentos WHERE valor > 0", self.connection)        
-        p = scipy.stats.percentileofscore(df['valor'], df['valor'].mean())
+        p = scipy.stats.percentileofscore(df['valor'], df['valor'].mean() + df['valor'].std())
         df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, p/100, 1], labels=['Faixa 1', 'Faixa 2'])        
         return df
         
@@ -190,7 +190,7 @@ class Analisador:
         df_faixa2 = df.loc[df['faixa_gasto'] == 'Faixa 2']
         qtd_faixa1 = len(df_faixa1)
         qtd_faixa2 = len(df_faixa2)                
-        media = df['valor'].mean()
+        corte = df['valor'].mean() + df['valor'].std()
         
         classificador.fit(x, y)
 
@@ -215,8 +215,8 @@ class Analisador:
 
             file.write("Classificador Random Forest com %d estimadores e profundidade máxima %d.\n" % (estimadores, profundidade) )        
             file.write("Classes: \n")
-            file.write(" * Faixa 1 (gasto até %.2f) - %d registros.\n" % (media, qtd_faixa1))
-            file.write(" * Faixa 2 (acima de %.2f) - %d registros.\n" % (media, qtd_faixa2))        
+            file.write(" * Faixa 1 (gasto até %.2f) - %d registros.\n" % (corte, qtd_faixa1))
+            file.write(" * Faixa 2 (acima de %.2f) - %d registros.\n" % (corte, qtd_faixa2))        
             file.write("Acurácias obtidas na validação cruzada com %d folds: %s\n" % (folds, ', '.join([str(a)+"%" for a in acuracias])))                
             file.write("Foram encontrada %d suspeitas.\n\n" % len(suspeitas))                
 
@@ -250,6 +250,8 @@ class Analisador:
         vmin = df['valor'].min()        
         vmax = df['valor'].max()                
         vmean = df['valor'].mean()        
+        vstd = df['valor'].std()        
+        corte = vmean + vstd
 
         plt.style.use('seaborn')
         plt.figure(figsize=(8,4))                
@@ -272,7 +274,7 @@ class Analisador:
             for i,p in percentis.items():
                 file.write("| %s | %d |\n" % (i,p))        
 
-            p = scipy.stats.percentileofscore(df['valor'], df['valor'].mean())        
+            p = scipy.stats.percentileofscore(df['valor'], corte)        
             file.write("\nO corte da Faixa 1 e Faixa 2 será no percentil %f.\n" % p)        
-            file.write("\nQuantidade de registros na Faixa 1): %d.\n" % df.loc[df['valor'] <= vmean].size)
-            file.write("\nQuantidade de registros na Faixa 2): %d.\n" % df.loc[df['valor'] > vmean].size)
+            file.write("\nQuantidade de registros na Faixa 1): %d.\n" % df.loc[df['valor'] <= corte].size)
+            file.write("\nQuantidade de registros na Faixa 2): %d.\n" % df.loc[df['valor'] > corte].size)
