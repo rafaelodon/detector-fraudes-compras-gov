@@ -32,8 +32,8 @@ def main():
 
     analisador = Analisador()      
     analisador.analisar_valores()
-    #analisador.gerar_tagclouds()    
-    #analisador.treinar_modelo_tipo()    
+    analisador.gerar_tagclouds()    
+    #analisador.avaliar_features_naive_bayes()    
     #analisador.analisar_topicos()    
     #analisador.treinar_modelo_faixa_gasto()    
     

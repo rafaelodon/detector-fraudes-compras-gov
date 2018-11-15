@@ -26,6 +26,8 @@ from sklearn.model_selection import cross_val_score
 import gensim 
 import pyLDAvis.gensim
 
+import scipy
+import numpy as np
 import matplotlib.pyplot as plt
 
 from wordcloud import WordCloud
@@ -49,8 +51,7 @@ class Analisador:
 
         if not os.path.exists(constantes.DIR_OUT):
             logging.info("Criando diretório de saídas da análise "+constantes.DIR_OUT)
-            os.makedirs(constantes.DIR_OUT)
-
+            os.makedirs(constantes.DIR_OUT)        
 
     def carregar_vectorizer(self):
         arquivo_vectorizer = constantes.ARQ_VECTORIZER
@@ -85,23 +86,25 @@ class Analisador:
             for i in range(ldamodel.num_topics):
                 file.write(ldamodel.print_topic(i)+"\n")
 
-    def gerar_tagclouds(self):        
-        df = pd.read_sql_query("SELECT texto_processado, valor, tipo FROM documentos", self.connection)        
-        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, .94, .98 , 1], labels=['Faixa 1', 'Faixa 2', 'Faixa 3'])
+    def gerar_tagclouds(self):                
+        df = self.obter_df_texto_faixa_gasto()        
         self.gerar_tagcloud_categoria(df.loc[df['faixa_gasto'] == 'Faixa 1'], 'Faixa 1')
-        self.gerar_tagcloud_categoria(df.loc[df['faixa_gasto'] == 'Faixa 2'], 'Faixa 2')
-        self.gerar_tagcloud_categoria(df.loc[df['faixa_gasto'] == 'Faixa 3'], 'Faixa 3')
+        self.gerar_tagcloud_categoria(df.loc[df['faixa_gasto'] == 'Faixa 2'], 'Faixa 2')        
     
     def gerar_tagcloud_categoria(self, df, categoria):                
         
         freqs = self.avaliar_frequencia_de_termos(df, categoria)
 
         logging.info('Gerando nuvem de tags para a categoria '+categoria)
-        w = WordCloud(width=1400, height=900, mode='RGBA', background_color='white', max_words=100, margin=1).fit_words(freqs)
+        plt.style.use('seaborn')
+        plt.figure(figsize=(12,6))                
+
+        w = WordCloud(width=1200, height=600, mode='RGBA', background_color='white', max_words=100, margin=1).fit_words(freqs)        
         plt.title('Nuvem de palavras '+categoria)
         plt.imshow(w)        
         plt.axis('off')
-        plt.savefig(constantes.DIR_OUT+'/tagcloud_'+categoria+'.png')
+        plt.savefig(constantes.DIR_OUT+'/tagcloud_'+categoria+'.png', bbox_inches='tight')
+        plt.clf()
 
     def avaliar_frequencia_de_termos(self, df, categoria):                
 
@@ -125,7 +128,7 @@ class Analisador:
         else:
             return value        
 
-    def treinar_modelo_tipo(self):  
+    def avaliar_features_naive_bayes(self):  
         '''
             A idéia aqui é treinar um classificador Naive Bayes no modelo Bag of Words para verificar
             depois quais são as features com maior variância, o que dará uma pista de quais são os
@@ -133,14 +136,20 @@ class Analisador:
         '''      
         logging.debug('Processando documentos')    
         
-        df = pd.read_sql_query("SELECT texto_processado, tipo FROM documentos", self.connection)        
+        df = self.obter_df_texto_faixa_gasto()
         
         x = self.vectorizer.transform(df['texto_processado']).toarray()
-        y = df['tipo']  
+        y = df['faixa_gasto']  
 
         logging.debug("Treinando classificador Naive Bayes")
         classificador = self.treinar_testar(GaussianNB(), x, y, 0.25)                        
         self.lista_features_importantes(classificador)
+
+    def obter_df_texto_faixa_gasto(self):
+        df = pd.read_sql_query("SELECT texto_processado, valor FROM documentos", self.connection)        
+        p = scipy.stats.percentileofscore(df['valor'], df['valor'].mean())
+        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, p/100, 1], labels=['Faixa 1', 'Faixa 2'])
+        return df
         
     def treinar_modelo_faixa_gasto(self):
         '''
@@ -179,9 +188,10 @@ class Analisador:
                     'id_compra_licitacao' : t.id_compra_licitacao
                 })
 
-        logging.info("%d suspeitas encontradas. Gravando no arquivo %s " % (len(suspeitas), constantes.ARQ_SUSPEITAS))
-
-        with codecs.open(constantes.DIR_OUT+"/suspeitas.txt", 'w', 'utf-8') as file:                            
+        arquivo_suspeitas = constantes.DIR_OUT+"/suspeitas.txt"
+        logging.info("%d suspeitas encontradas. Gravando no arquivo %s " % (len(suspeitas), arquivo_suspeitas))
+        
+        with codecs.open(arquivo_suspeitas, 'w', 'utf-8') as file:                            
             for t in sorted(suspeitas, key=lambda s : s['valor'], reverse=True):                                    
                 link = "http://compras.dados.gov.br"
                 if t['tipo'] == 'compra':
@@ -225,36 +235,30 @@ class Analisador:
         
         vmin = df['valor'].min()        
         vmax = df['valor'].max()                
-        vmean = df['valor'].mean()
-        vstd = df['valor'].std()
+        vmean = df['valor'].mean()        
 
         plt.style.use('seaborn')
-        
-        plt.figure(figsize=(8,4))
-        df['valor'].plot(kind='bar', bins=100, rwidth=0.8)                
-        #plt.xticks(range(int(vmin), int(vmax), int((vmax-vmin)/20.0)), rotation=30)        
-        #plt.grid(axis='x')                
-        #plt.ylabel('Quantidade de compras')        
-        #plt.xlabel('Gasto em reais')        
-        #plt.title('Histograma dos valores das compras')      
-        plt.tight_layout()        
-        #plt.savefig(constantes.DIR_OUT+'/histograma_valores.png')      
-        plt.show()
+        plt.figure(figsize=(8,4))                
 
-        '''
-        plt.figure(figsize=(8,4))
-        plt.plot(df['valor'])                
-        #plt.xticks(range(int(vmin), int(vmax), int((vmax-vmin)/20.0)), rotation=30)        
-        plt.grid(axis='x')          
-        plt.xlabel('Gasto em reais')                    
-        plt.title('Distribuição dos Valores das Compras')      
+        df['valor'].plot(kind='hist', bins=100, log=True, rwidth=0.8)                
+        plt.xticks(range(int(vmin), int(vmax), int((vmax-vmin)/20.0)), rotation=30)        
+        plt.grid(axis='x')                
+        plt.ylabel('Quantidade de compras')        
+        plt.xlabel('Gasto em reais')        
+        plt.title('Histograma dos valores das compras')      
         plt.tight_layout()        
-        plt.savefig(constantes.DIR_OUT+'/distribuicao.png')      
-        
-        percentis = df['valor'].describe(percentiles=[x/100 for x in range(0, 101)])
-        with open(constantes.DIR_OUT+'/percentis.md', 'w') as file:                        
+        plt.savefig(constantes.DIR_OUT+'/histograma_valores.png')   
+
+        plt.clf()
+                
+        percentis = df['valor'].describe(percentiles=[x/100 for x in range(0, 101, 3)])
+        with open(constantes.DIR_OUT+'/descritiva.md', 'w') as file:                        
             file.write("| descritiva | valor |\n")
             file.write("| --- | --- |\n")
             for i,p in percentis.items():
-                file.write("| %s | %d |\n" % (i,p))
-        '''
+                file.write("| %s | %d |\n" % (i,p))        
+
+            p = scipy.stats.percentileofscore(df['valor'], df['valor'].mean())        
+            file.write("\nO corte da Faixa 1 e Faixa 2 será no percentil %f.\n" % p)        
+            file.write("\nQuantidade de registros na Faixa 1): %d.\n" % df.loc[df['valor'] <= vmean].size)
+            file.write("\nQuantidade de registros na Faixa 2): %d.\n" % df.loc[df['valor'] > vmean].size)
