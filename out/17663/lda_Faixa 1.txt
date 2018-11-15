@@ -1,0 +1,3 @@
+0.021*"curso" + 0.020*"servidores" + 0.015*"periodo" + 0.011*"com" + 0.010*"realizado" + 0.009*"material" + 0.008*"ser" + 0.008*"abaixo" + 0.007*"atender" + 0.007*"referente"
+0.013*"curso" + 0.012*"servidores" + 0.011*"com" + 0.010*"conforme" + 0.008*"anexo" + 0.007*"estabelecido" + 0.007*"dos" + 0.007*"esta" + 0.007*"atender" + 0.006*"especializada"
+0.029*"curso" + 0.027*"servidores" + 0.012*"com" + 0.010*"dos" + 0.009*"periodo" + 0.009*"atender" + 0.008*"material" + 0.006*"pelo" + 0.006*"capacitacao" + 0.006*"participacao"

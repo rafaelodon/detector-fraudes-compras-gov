@@ -158,10 +158,14 @@ class Analisador:
 
         self.lista_features_importantes(classificador)
 
-    def obter_df_texto_faixa_gasto(self):
-        df = pd.read_sql_query("SELECT texto_processado, valor FROM documentos", self.connection)        
+    def obter_df_texto_faixa_gasto(self):        
+        df = pd.read_sql_query("SELECT id, id_compra_licitacao, texto_processado, valor, tipo FROM documentos WHERE valor > 0", self.connection)        
         p = scipy.stats.percentileofscore(df['valor'], df['valor'].mean())
         df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, p/100, 1], labels=['Faixa 1', 'Faixa 2'])
+
+        print(df['valor'].mean())
+        print(len(df.loc[df['valor'] < df['valor'].mean()]))
+        print(len(df.loc[df['valor'] > df['valor'].mean()]))
         return df
         
     def treinar_modelo_faixa_gasto(self):
@@ -173,8 +177,7 @@ class Analisador:
         
         logging.debug('Processando documentos')    
         
-        df = pd.read_sql_query("SELECT id, id_compra_licitacao, texto_processado, valor, tipo FROM documentos WHERE valor > 0", self.connection)                    
-        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, .90, .95, 1.], labels=['Faixa 1', 'Faixa 2', 'Faixa 3'])
+        df = self.obter_df_texto_faixa_gasto()
 
         x = self.vectorizer.transform(df['texto_processado']).toarray()
         y = df['faixa_gasto']  

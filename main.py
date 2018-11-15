@@ -31,11 +31,11 @@ def main():
     #processador.processar_texto()    
 
     analisador = Analisador()      
-    #analisador.analisar_valores()
-    #analisador.gerar_tagclouds()    
-    #analisador.avaliar_features_naive_bayes()    
+    analisador.analisar_valores()
+    analisador.gerar_tagclouds()    
+    analisador.avaliar_features_naive_bayes()    
     analisador.analisar_topicos()    
-    #analisador.treinar_modelo_faixa_gasto()    
+    analisador.treinar_modelo_faixa_gasto()    
     
 if __name__ == "__main__":    
     main()
