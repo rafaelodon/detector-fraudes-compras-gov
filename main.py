@@ -21,24 +21,24 @@ def main():
 
     logging.debug("Iniciando")
 
-    coletor = Coletor()                
+    #coletor = Coletor()                
     #coletor.coletar_compras_e_licitacoes()
-    coletor.coletar_historico_selic()
+    #coletor.coletar_historico_selic()
 
-    extrator = Extrator(override=False)
+    extrator = Extrator()
     extrator.extrair_texto_compras_licitacoes()        
     extrator.extrair_historico_selic()
 
     processador = Processador()
     processador.processar_texto()    
-    processador.atualizar_valores_com_selic()
+    processador.atualizar_valores_com_selic()    
 
     analisador = Analisador()      
     analisador.analisar_valores()
     analisador.gerar_tagclouds()    
     analisador.avaliar_features_naive_bayes()    
     analisador.analisar_topicos()    
-    analisador.treinar_modelo_faixa_gasto()    
+    analisador.identificar_compras_suspeitas()    
     
 if __name__ == "__main__":    
     main()

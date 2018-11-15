@@ -159,28 +159,23 @@ class Analisador:
         self.lista_features_importantes(classificador)
 
     def obter_df_texto_faixa_gasto(self):        
-        df = pd.read_sql_query("SELECT id, id_compra_licitacao, texto_processado, valor, tipo FROM documentos WHERE valor > 0", self.connection)        
+        df = pd.read_sql_query("SELECT id, id_compra_licitacao, texto_processado, valor_atualizado as valor, tipo FROM documentos WHERE valor > 0", self.connection)                
         p = scipy.stats.percentileofscore(df['valor'], df['valor'].mean() + df['valor'].std())
-        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, p/100, 1], labels=['Faixa 1', 'Faixa 2'])        
+        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, p/100, 1], labels=['Faixa 1', 'Faixa 2'])                
         return df
         
-    def treinar_modelo_faixa_gasto(self):
-        '''
-            A idéia aqui é treinar um classificador que tenha alta revogação na faixa de preços menores,
-            e julgar os registros da faixa maior classificados como faixa menor como candidatos
-            a "compras suspeitas" (valor alto mas texto parecido com outras compras de valor menor)
-        '''
+    def identificar_compras_suspeitas(self):
         
         logging.debug('Processando documentos')    
         
         df = self.obter_df_texto_faixa_gasto()
 
-        x = self.vectorizer.transform(df['texto_processado']).toarray()
-        y = df['faixa_gasto']  
+        x = self.vectorizer.transform(df['texto_processado']).toarray()        
+        y = df['faixa_gasto']
 
         logging.debug("Verificando a acurácia do classificador Random Forest")
-        estimadores = 10
-        profundidade = 50
+        estimadores = 5
+        profundidade = 10
         folds = 5
         classificador = RandomForestClassifier(n_estimators=estimadores, max_depth=profundidade, random_state=0)
         acuracias = cross_val_score(classificador, x, y, cv=folds)
@@ -195,9 +190,9 @@ class Analisador:
         classificador.fit(x, y)
 
         logging.debug("Classificando documentos para encontrar suspeitas")
-        suspeitas = []        
-        for t in df.itertuples():
-            y = classificador.predict([x[t.Index]])            
+        suspeitas = []              
+        for t in df.itertuples():            
+            y = classificador.predict([x[t.Index]])
             if t.faixa_gasto > y[0]:                                                 
                 suspeitas.append({
                     "tipo" : t.tipo,
@@ -244,7 +239,7 @@ class Analisador:
         
     def analisar_valores(self):
 
-        df = pd.read_sql_query("SELECT tipo, valor FROM documentos WHERE valor > 0", self.connection)
+        df = pd.read_sql_query("SELECT tipo, valor_atualizado as valor FROM documentos WHERE valor > 0", self.connection)
         pd.options.display.float_format = '{:.2f}'.format        
         
         vmin = df['valor'].min()        
@@ -275,6 +270,4 @@ class Analisador:
                 file.write("| %s | %d |\n" % (i,p))        
 
             p = scipy.stats.percentileofscore(df['valor'], corte)        
-            file.write("\nO corte da Faixa 1 e Faixa 2 será no percentil %f.\n" % p)        
-            file.write("\nQuantidade de registros na Faixa 1): %d.\n" % df.loc[df['valor'] <= corte].size)
-            file.write("\nQuantidade de registros na Faixa 2): %d.\n" % df.loc[df['valor'] > corte].size)
+            file.write("\nO corte da Faixa 1 e Faixa 2 será no percentil %f.\n" % p)

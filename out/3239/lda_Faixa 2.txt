@@ -1,3 +1,3 @@
-0.048*"veiculos" + 0.038*"motorista" + 0.038*"com" + 0.029*"pequenas" + 0.028*"transporte" + 0.026*"pecas" + 0.026*"locacao" + 0.024*"atender" + 0.023*"manutencao" + 0.021*"nuraf"
-0.054*"diaria" + 0.030*"tipo" + 0.025*"meses" + 0.025*"inca" + 0.024*"unidades" + 0.023*"feira" + 0.023*"transporte" + 0.021*"anexo" + 0.020*"com" + 0.020*"pacientes"
-0.037*"transporte" + 0.027*"com" + 0.022*"polos" + 0.021*"atender" + 0.020*"motorista" + 0.016*"dos" + 0.016*"veiculos" + 0.016*"presenciais" + 0.016*"provedores" + 0.015*"pequenas"
+0.048*"veiculos" + 0.037*"com" + 0.028*"motorista" + 0.027*"locacao" + 0.026*"transporte" + 0.020*"pecas" + 0.019*"manutencao" + 0.018*"horas" + 0.017*"pequenas" + 0.016*"nuraf"
+0.050*"diaria" + 0.028*"inca" + 0.028*"tipo" + 0.026*"feira" + 0.026*"meses" + 0.026*"unidades" + 0.025*"anexo" + 0.021*"com" + 0.021*"cargas" + 0.020*"segunda"
+0.021*"nos" + 0.021*"irrigados" + 0.021*"perimetro" + 0.019*"transporte" + 0.015*"codevasf" + 0.014*"sistema" + 0.014*"superintendencia" + 0.013*"motorista" + 0.012*"veiculos" + 0.011*"total"

@@ -1,13 +1,48 @@
-Classificador Random Forest com 10 estimadores e profundidade máxima 50.
+Classificador Random Forest com 5 estimadores e profundidade máxima 10.
 Classes: 
- * Faixa 1 (gasto até 67878.24) - 2715 registros.
- * Faixa 2 (acima de 67878.24) - 50 registros.
-Acurácias obtidas na validação cruzada com 5 folds: 0.9819168173598554%, 0.9819168173598554%, 0.9819168173598554%, 0.9819168173598554%, 0.9819168173598554%
-Foram encontrada 6 suspeitas.
+ * Faixa 1 (gasto até 437236.17) - 2716 registros.
+ * Faixa 2 (acima de 437236.17) - 49 registros.
+Acurácias obtidas na validação cruzada com 5 folds: 0.9819494584837545%, 0.9819168173598554%, 0.9801084990958409%, 0.9819168173598554%, 0.9836956521739131%
+Foram encontrada 41 suspeitas.
 
-A licitacao #3065 de valor 1223000.00 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/12010005000382009)
-A licitacao #3138 de valor 657777.75 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/56001003000012004)
-A compra #78 de valor 429674.00 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/20001206000012001)
-A compra #1089 de valor 247454.39 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15421506000732000)
-A compra #1068 de valor 91011.00 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/18303807000252000)
-A licitacao #3023 de valor 81500.00 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/12010005000312009)
+A compra #78 de valor 3723691.94 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/20001206000012001)
+A compra #2237 de valor 3359457.66 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15308006000101999)
+A compra #2621 de valor 3054234.70 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/25000506001022002)
+A licitacao #3065 de valor 2855691.39 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/12010005000382009)
+A compra #224 de valor 2797854.93 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/26400806000392002)
+A compra #1974 de valor 2696475.32 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/37308306000882000)
+A compra #1089 de valor 2224182.19 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15421506000732000)
+A compra #178 de valor 1904374.93 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/25000506000992002)
+A compra #607 de valor 1879579.73 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15404106003062001)
+A compra #1507 de valor 1751095.53 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/20300106000051998)
+A compra #2606 de valor 1530760.37 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/25000506001012002)
+A compra #2625 de valor 1470804.39 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/25000506001032002)
+A compra #771 de valor 1442423.78 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15404106002302001)
+A compra #1069 de valor 1332183.02 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/18303807000252001)
+A licitacao #3176 de valor 1319801.88 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/15812503000022013)
+A compra #930 de valor 1299114.16 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/25009807000021999)
+A compra #3 de valor 1290881.56 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/20010906000152003)
+A compra #24 de valor 1231093.46 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/25009807000031999)
+A compra #1649 de valor 1183407.61 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/27308707000042000)
+A compra #749 de valor 990966.09 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15306306002622002)
+A compra #1156 de valor 965167.36 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/20011606000291999)
+A compra #2532 de valor 923099.98 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15306506005182001)
+A compra #22 de valor 849001.83 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15384306000032001)
+A compra #2547 de valor 820733.38 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15306306005362003)
+A compra #493 de valor 812401.74 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/18303807000302001)
+A compra #1068 de valor 806655.87 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/18303807000252000)
+A compra #1446 de valor 696753.02 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15307906056071999)
+A compra #2145 de valor 657227.54 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15307906016202002)
+A compra #1953 de valor 655641.12 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/11460106000852001)
+A compra #1758 de valor 621609.16 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/25442006013832002)
+A compra #1433 de valor 610773.05 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15404006038672001)
+A compra #1872 de valor 609112.73 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15306306004592002)
+A licitacao #2794 de valor 608268.90 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/19340101000082001)
+A licitacao #2809 de valor 577624.46 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/19340101000092001)
+A compra #1255 de valor 546759.52 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/38001807000102002)
+A licitacao #3034 de valor 521767.98 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/25009801000332000)
+A compra #1644 de valor 508190.01 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/34400106003691999)
+A compra #1646 de valor 508190.01 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/34400107003691999)
+A compra #934 de valor 479220.29 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15301807000022000)
+A compra #2035 de valor 454525.23 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15300407002051999)
+A compra #1252 de valor 447168.67 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/25502507000102002)

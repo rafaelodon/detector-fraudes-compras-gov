@@ -1,3 +1,3 @@
-0.024*"curso" + 0.014*"instituicao" + 0.010*"saude" + 0.009*"ensino" + 0.009*"contratos" + 0.008*"profissional" + 0.008*"graduacao" + 0.007*"pesquisa" + 0.007*"especializacao" + 0.007*"federal"
-0.016*"horas" + 0.014*"com" + 0.010*"pesquisa" + 0.009*"oficinas" + 0.008*"agroecologia" + 0.007*"alimentos" + 0.007*"treinamento" + 0.007*"curso" + 0.006*"dos" + 0.006*"por"
-0.027*"curso" + 0.016*"com" + 0.012*"capacitacao" + 0.012*"dos" + 0.011*"saude" + 0.010*"transito" + 0.010*"destinado" + 0.010*"area" + 0.009*"atender" + 0.008*"tecnica"
+0.029*"curso" + 0.013*"dos" + 0.011*"tecnica" + 0.011*"com" + 0.011*"transito" + 0.010*"capacitacao" + 0.010*"saude" + 0.009*"area" + 0.009*"treinamento" + 0.008*"anexo"
+0.024*"curso" + 0.012*"saude" + 0.010*"com" + 0.009*"ambiental" + 0.009*"treinamento" + 0.009*"atender" + 0.008*"especializada" + 0.008*"processo" + 0.008*"educacao" + 0.007*"eventual"
+0.017*"graduacao" + 0.017*"curso" + 0.016*"pos" + 0.014*"com" + 0.013*"horas" + 0.013*"especializacao" + 0.012*"capacitacao" + 0.011*"material" + 0.010*"servidores" + 0.007*"atender"

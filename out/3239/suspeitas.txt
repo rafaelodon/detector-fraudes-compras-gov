@@ -1,7 +1,9 @@
-Classificador Random Forest com 10 estimadores e profundidade máxima 50.
+Classificador Random Forest com 5 estimadores e profundidade máxima 10.
 Classes: 
- * Faixa 1 (gasto até 247368.04) - 1982 registros.
- * Faixa 2 (acima de 247368.04) - 40 registros.
-Acurácias obtidas na validação cruzada com 5 folds: 0.9925925925925926%, 0.9950617283950617%, 0.995049504950495%, 0.995049504950495%, 0.9975247524752475%
-Foram encontrada 0 suspeitas.
+ * Faixa 1 (gasto até 1822154.05) - 999 registros.
+ * Faixa 2 (acima de 1822154.05) - 12 registros.
+Acurácias obtidas na validação cruzada com 5 folds: 0.9852216748768473%, 0.9852216748768473%, 0.9900990099009901%, 0.9900990099009901%, 0.9900497512437811%
+Foram encontrada 2 suspeitas.
 
+A licitacao #1063 de valor 43048801.96 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/25005203000892000)
+A licitacao #1725 de valor 3260659.88 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/25001502000012002)

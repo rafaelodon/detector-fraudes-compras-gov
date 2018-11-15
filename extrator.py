@@ -25,7 +25,7 @@ class Extrator():
         if 'override' in kwargs:
             self.override = kwargs['override']
         else:
-            self.override = False
+            self.override = True
 
         if not os.path.exists(constantes.DIR_DATA):
             os.mkdir(constantes.DIR_DATA)
