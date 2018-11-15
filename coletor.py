@@ -20,6 +20,11 @@ class Coletor:
     def set_modo_offline(self):
         self.modo_offline = True
 
+    def coletar_historico_selic(self):
+        url = "https://www.bcb.gov.br/pec/copom/port/taxaselic.asp"
+        arquivo = constantes.DIR_CACHE + "/selic.html"
+        self.__buscar_com_cache(url, arquivo)
+
     def coletar_compras_e_licitacoes(self):
         self.__coletar_compras_do_servico(constantes.ID_SERVICO)
         self.__coletar_licitacoes_do_servico(constantes.ID_SERVICO)

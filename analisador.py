@@ -161,11 +161,7 @@ class Analisador:
     def obter_df_texto_faixa_gasto(self):        
         df = pd.read_sql_query("SELECT id, id_compra_licitacao, texto_processado, valor, tipo FROM documentos WHERE valor > 0", self.connection)        
         p = scipy.stats.percentileofscore(df['valor'], df['valor'].mean())
-        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, p/100, 1], labels=['Faixa 1', 'Faixa 2'])
-
-        print(df['valor'].mean())
-        print(len(df.loc[df['valor'] < df['valor'].mean()]))
-        print(len(df.loc[df['valor'] > df['valor'].mean()]))
+        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, p/100, 1], labels=['Faixa 1', 'Faixa 2'])        
         return df
         
     def treinar_modelo_faixa_gasto(self):
@@ -183,11 +179,19 @@ class Analisador:
         y = df['faixa_gasto']  
 
         logging.debug("Verificando a acurácia do classificador Random Forest")
-        classificador = RandomForestClassifier(n_estimators=50, max_depth=50, random_state=0)
-        acuracias = cross_val_score(classificador, x, y, cv=5)
+        estimadores = 10
+        profundidade = 50
+        folds = 5
+        classificador = RandomForestClassifier(n_estimators=estimadores, max_depth=profundidade, random_state=0)
+        acuracias = cross_val_score(classificador, x, y, cv=folds)
         logging.debug("Acurácias:"+str(acuracias))        
 
-        logging.debug("Ajustando classificador Random Forest com toda a base")
+        df_faixa1 = df.loc[df['faixa_gasto'] == 'Faixa 1']
+        df_faixa2 = df.loc[df['faixa_gasto'] == 'Faixa 2']
+        qtd_faixa1 = len(df_faixa1)
+        qtd_faixa2 = len(df_faixa2)                
+        media = df['valor'].mean()
+        
         classificador.fit(x, y)
 
         logging.debug("Classificando documentos para encontrar suspeitas")
@@ -208,6 +212,14 @@ class Analisador:
         logging.info("%d suspeitas encontradas. Gravando no arquivo %s " % (len(suspeitas), arquivo_suspeitas))
         
         with codecs.open(arquivo_suspeitas, 'w', 'utf-8') as file:                            
+
+            file.write("Classificador Random Forest com %d estimadores e profundidade máxima %d.\n" % (estimadores, profundidade) )        
+            file.write("Classes: \n")
+            file.write(" * Faixa 1 (gasto até %.2f) - %d registros.\n" % (media, qtd_faixa1))
+            file.write(" * Faixa 2 (acima de %.2f) - %d registros.\n" % (media, qtd_faixa2))        
+            file.write("Acurácias obtidas na validação cruzada com %d folds: %s\n" % (folds, ', '.join([str(a)+"%" for a in acuracias])))                
+            file.write("Foram encontrada %d suspeitas.\n\n" % len(suspeitas))                
+
             for t in sorted(suspeitas, key=lambda s : s['valor'], reverse=True):                                    
                 link = "http://compras.dados.gov.br"
                 if t['tipo'] == 'compra':
@@ -215,8 +227,6 @@ class Analisador:
                 else:
                     link += "/licitacoes/doc/licitacao/" + t['id_compra_licitacao']
                 file.write("A %s #%d de valor %0.2f é da %s mas parece ser da %s. (%s)\n" % (t['tipo'], t['id'], t['valor'], t['faixa_banco'], t['faixa_predita'], link))
-    
-    
 
     def lista_features_importantes(self, clas, n=30):
         feature_names = self.vectorizer.get_feature_names()                
