@@ -94,32 +94,32 @@ class Analisador:
                 file.write(ldamodel.print_topic(i)+"\n")
 
     def gerar_tagclouds(self):        
-        self.gerar_tagcloud_tipo('compra')
-        self.gerar_tagcloud_tipo('licitacao')
+        df = pd.read_sql_query("SELECT texto_processado, valor, tipo FROM documentos", self.connection)        
+        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, .94, .98 , 1], labels=['Faixa 1', 'Faixa 2', 'Faixa 3'])
+        self.gerar_tagcloud_categoria(df.loc[df['faixa_gasto'] == 'Faixa 1'], 'Faixa 1')
+        self.gerar_tagcloud_categoria(df.loc[df['faixa_gasto'] == 'Faixa 2'], 'Faixa 2')
+        self.gerar_tagcloud_categoria(df.loc[df['faixa_gasto'] == 'Faixa 3'], 'Faixa 3')
     
-    def gerar_tagcloud_tipo(self, tipo):                
+    def gerar_tagcloud_categoria(self, df, categoria):                
         
-        freqs = self.avaliar_frequencia_de_termos(tipo)
+        freqs = self.avaliar_frequencia_de_termos(df, categoria)
 
-        logging.info('Gerando nuvem de tags para o tipo '+tipo)
+        logging.info('Gerando nuvem de tags para a categoria '+categoria)
         w = WordCloud(width=1400, height=900, mode='RGBA', background_color='white', max_words=100, margin=1).fit_words(freqs)
-        plt.title('Nuvem de palavras de '+tipo)
+        plt.title('Nuvem de palavras '+categoria)
         plt.imshow(w)        
         plt.axis('off')
-        plt.savefig('./out/tagcloud_'+tipo+'.png')
+        plt.savefig('./out/tagcloud_'+categoria+'.png')
 
-    def avaliar_frequencia_de_termos(self, tipo):                
+    def avaliar_frequencia_de_termos(self, df, categoria):                
 
-        logging.info('Analisando frequência de termos para o tipo '+tipo)
-        
-        df = pd.read_sql_query("SELECT texto_processado, tipo FROM documentos", self.connection)        
-        df = df[df['tipo'] == tipo]        
-        
+        logging.info('Analisando frequência de termos para o tipo '+categoria)
+                
         tfidf_matrix = self.vectorizer.fit_transform(df['texto_processado'])                
         
         freqs = { word : tfidf_matrix.getcol(idx).sum() for word, idx in self.vectorizer.vocabulary_.items()}                     
 
-        with open('./out/termos_'+tipo+'.md', 'w') as file:
+        with open('./out/termos_'+categoria+'.md', 'w') as file:
             file.write('| palavra | tf-idf |\n')
             file.write('| --- | --- |\n')
             for k,v in sorted(freqs.items(), key=lambda kv : kv[1], reverse=True):
@@ -228,7 +228,21 @@ class Analisador:
         
     def analisar_valores(self):
 
-        df = pd.read_sql_query("SELECT valor FROM documentos WHERE valor > 0", self.connection)                
-        print(pd.qcut(df['valor'], q=[0, .95, 1], retbins=True))
-        #plt.hist(df['valor'], bins=10)
-        #plt.show()
+        df = pd.read_sql_query("SELECT tipo, valor FROM documentos WHERE valor > 0", self.connection)
+        pd.options.display.float_format = '{:.2f}'.format        
+        
+        plt.style.use('seaborn')
+        plt.figure(figsize=(6,4))
+        plt.hist(df['valor'], bins=15, log=True, normed=True, rwidth=0.8)                
+        plt.xticks(rotation=30)        
+        plt.grid(axis='x')                
+        plt.ylabel('Quantidade de compras')        
+        plt.xlabel('Gasto em reais')        
+        plt.title('Histograma dos valores das compras')      
+        plt.tight_layout()        
+        plt.savefig('./out/histograma_valores.png')      
+        
+        percentis = df['valor'].describe(percentiles=[x/100 for x in range(90, 101)])
+        with open('./out/percentis.md', 'w') as file:                        
+            for i,p in percentis.items():
+                file.write("| %s | %d |\n" % (i,p))
