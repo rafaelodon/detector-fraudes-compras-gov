@@ -63,26 +63,33 @@ class Analisador:
             logging.error("O vectorizer ainda não existe. Execute o processador.")
             exit(1)
 
-    def analisar_topicos(self):        
-        logging.info("Vetorizando documentos")
-        df = pd.read_sql_query("SELECT texto_processado FROM documentos", self.connection)                            
-        
+    def analisar_topicos(self):                
+        df = self.obter_df_texto_faixa_gasto()        
+        self.analisar_topicos_categoria(df.loc[df['faixa_gasto'] == 'Faixa 1'], 'Faixa 1')
+        self.analisar_topicos_categoria(df.loc[df['faixa_gasto'] == 'Faixa 2'], 'Faixa 2')        
+
+    def analisar_topicos_categoria(self, df, categoria):        
+
+        logging.info("Analisando tópicos da "+categoria+" com LDA")
+
         logging.info("Criando dicionário")                    
         docs = [row.texto_processado.split() for row in df.itertuples()]            
         dictionary = gensim.corpora.Dictionary(docs)            
 
-        logging.info("Criando corpus ")            
+        logging.info("Criando corpus")            
         corpus = [dictionary.doc2bow(text) for text in docs]
 
         logging.info("Gerando modelo LDA")
-        ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=2, id2word = dictionary, passes=10)        
+        ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=3, id2word = dictionary, passes=3)        
 
         p = pyLDAvis.gensim.prepare(ldamodel, corpus, dictionary)
-        pyLDAvis.save_html(p, constantes.DIR_OUT+'/lda.html')
+        arquivo_html = constantes.DIR_OUT+'/lda_'+categoria+'.html'
+        logging.info("Gravando HTML interativo dao LDA em "+arquivo_html)
+        pyLDAvis.save_html(p, arquivo_html)
 
-        logging.info("Tópicos encontrados pelo LDA:")
-        ldamodel.print_topics(num_topics=2, num_words=5)            
-        with open(constantes.DIR_OUT+'/lda.txt', 'w') as file:            
+        arquivo_texto = constantes.DIR_OUT+'/lda_'+categoria+'.txt'
+        logging.info("Gravando saída de texto do LDA em "+arquivo_texto)        
+        with open(arquivo_texto, 'w') as file:            
             for i in range(ldamodel.num_topics):
                 file.write(ldamodel.print_topic(i)+"\n")
 
@@ -141,8 +148,14 @@ class Analisador:
         x = self.vectorizer.transform(df['texto_processado']).toarray()
         y = df['faixa_gasto']  
 
-        logging.debug("Treinando classificador Naive Bayes")
-        classificador = self.treinar_testar(GaussianNB(), x, y, 0.25)                        
+        logging.debug("Avaliando acurácia do classificador Naive Bayes")
+        classificador = GaussianNB()
+        acuracias = cross_val_score(classificador, x, y, cv=5)
+        logging.debug("Acurácias:"+str(acuracias))        
+
+        logging.debug("Ajustando classificador Naive Bayes com toda a base")
+        classificador.fit(x, y)
+
         self.lista_features_importantes(classificador)
 
     def obter_df_texto_faixa_gasto(self):
@@ -200,29 +213,17 @@ class Analisador:
                     link += "/licitacoes/doc/licitacao/" + t['id_compra_licitacao']
                 file.write("A %s #%d de valor %0.2f é da %s mas parece ser da %s. (%s)\n" % (t['tipo'], t['id'], t['valor'], t['faixa_banco'], t['faixa_predita'], link))
     
-    def treinar_testar(self, classifier, x, y, split):
-        
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=split, random_state=0)  
-        classifier.fit(x_train, y_train)
-        y_pred = classifier.predict(x_test) 
+    
 
-        logging.debug("Matriz de confusão:")
-        print(confusion_matrix(y_test,y_pred))
-
-        logging.debug("Matriz de confusão:")
-        print(classification_report(y_test,y_pred))          
-
-        logging.debug('Acurácia: '+str(accuracy_score(y_test, y_pred)))
-
-        return classifier
-
-    def lista_features_importantes(self, clas, n=20):
+    def lista_features_importantes(self, clas, n=30):
         feature_names = self.vectorizer.get_feature_names()                
         for i in range(0, len(clas.classes_)):
             topn = sorted(zip(clas.sigma_[i], clas.theta_[i], feature_names),reverse=True)[:n]
-            logging.info("Palavras importantes em "+clas.classes_[i])
+    
+            arquivo = constantes.DIR_OUT+'/features_naive_bayes_'+clas.classes_[i]+'.md'
+            logging.info("Gravando lista de palavras importantes da %s em  %s" % (clas.classes_[i], arquivo))
 
-            with open(constantes.DIR_OUT+'/features_naive_bayes_'+clas.classes_[i]+'.md', 'w') as file:
+            with open(arquivo, 'w') as file:
                 file.write('| ranking | palavra | sigma | theta |\n')
                 file.write('| --- | --- | --- | --- |\n')                                    
                 for index, (sigma, tetha, feat) in enumerate(topn):                    

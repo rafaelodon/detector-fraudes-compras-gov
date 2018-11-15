@@ -1,0 +1,3 @@
+0.032*"transporte" + 0.023*"frete" + 0.021*"com" + 0.016*"veiculos" + 0.014*"aldeia" + 0.013*"memo" + 0.011*"servicos" + 0.009*"percurso" + 0.009*"barra" + 0.008*"atender"
+0.027*"transporte" + 0.018*"com" + 0.011*"atender" + 0.011*"especializada" + 0.010*"anexo" + 0.009*"servicos" + 0.008*"pessoas" + 0.008*"conforme" + 0.008*"dos" + 0.007*"empresa"
+0.029*"transporte" + 0.013*"ate" + 0.012*"com" + 0.011*"aldeia" + 0.010*"frete" + 0.010*"memo" + 0.010*"materiais" + 0.009*"ald" + 0.008*"dos" + 0.007*"empresa"

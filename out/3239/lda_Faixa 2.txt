@@ -1,0 +1,3 @@
+0.034*"transporte" + 0.025*"veiculos" + 0.021*"com" + 0.016*"atender" + 0.013*"motorista" + 0.011*"pessoas" + 0.011*"locacao" + 0.010*"passageiros" + 0.010*"tipo" + 0.009*"especializada"
+0.037*"transporte" + 0.032*"com" + 0.018*"onibus" + 0.016*"motorista" + 0.011*"pessoas" + 0.010*"rodoviario" + 0.009*"condicionado" + 0.008*"dias" + 0.007*"terrestre" + 0.007*"pessoal"
+0.021*"transporte" + 0.014*"pequenas" + 0.014*"veiculos" + 0.013*"pessoas" + 0.013*"com" + 0.012*"cargas" + 0.011*"porto" + 0.011*"medio" + 0.010*"feira" + 0.009*"atender"
