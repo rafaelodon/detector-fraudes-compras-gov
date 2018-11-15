@@ -172,7 +172,7 @@ class Extrator():
             sel = parsel.Selector(html)
             datas = sel.xpath('//html/body/div[2]/div[3]/table//tr/td[position()=4]/text()').getall()
             taxas = sel.xpath('//html/body/div[2]/div[3]/table//tr/td[position()=7]/text()').getall()
-            selic = []
+            
             i = 0                                
             while i < len(datas) and i < len(taxas):
                 data = datas[i].strip()
