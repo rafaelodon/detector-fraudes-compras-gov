@@ -72,13 +72,13 @@ A primeira responsabilidade do **Processador** é pré-processar o conteúdo tex
 
 * **Texto em minúsculo** - Optou-se por tratar todas as palavras em minúsculo.
 
-* **Remoção de acentos** - Foi verificado navegando nos documentos extraídos, há ocorrência de palavras iguais com e sem acentuação ao longo dos textos, o que prejudica a correta contagem da frequência dos termos.
+* **Remoção de acentos** - Navegando nos documentos extraídos foi verificada a ocorrência de palavras iguais, porém com e sem acentuação. Isso prejudicaria a correta contagem da frequência dos termos.
 
 * **Remoção da pontuação** - Como não houve necessidade de preservar as sentenças, todas as palavras ficaram separadas por um único espaço, facilitando tratamentos posteriores. Isso foi feito com ajuda de um **RegexpTokenizer** que trasnformou o texto numa lista de palavras, ignorando espaços adjacentes e pontuação.
 
 * **Remoção de tokens numéricos** - Tokens apenas numéricos não foram incluídos no texto processado final pois não apresentaram benefício para a análise.
 
-* **Remoção de palavras do domínio** - Algumas expressões específicas do assunto Compras Goveernamentais estavam presentes nos documentos mas não contribuiram para uma boa compreensão do conteúdo das compras através da frequência de teremos. Sendo assim alguns termos foram removidos:
+* **Remoção de palavras do domínio** - Algumas expressões específicas do assunto Compras Governamentais estavam presentes em muitos documentos e acabavam não contribuindo para uma boa compreensão do conteúdo das compras através da análise da frequência de termos. Sendo assim algumas delas foram removidos:
     
 ```
     REMOVER = [ 'pregao eletronico', 'pregao', 'aquisicao', 'valor',
@@ -89,39 +89,41 @@ A primeira responsabilidade do **Processador** é pré-processar o conteúdo tex
 ```
 
 * **União de palavras quebradas:**
-   Ao investigar a base de documentos visualmente, foi verificada uma grande ocorrência de palavras quebradas que deveriam estar unidas (ex: ca pacaitacação -> capacitação, traba lho -> trabalho). Para tenta resolver esse problema, foi proposta uma heurística sobre a sequência de tokens do texto. Se o *token i* concatenado ao *token i+1* formar uma palavra uma palavra integrante do vocabulário composto por todos documentos em questão, cuja frequência dessa palavra unida seja maior que 25% da frequência dos tokens separados, então os 2 tokens adjacentes são transformados num único token concatenado. Para que essa estratégia funcionasse foi preciso realizar uma primeira passada em todos os documentos para criar esse vocabulário e calcular as frequências dos tokens. Os resultados foram satisfatórios e trouxeram maior qualidade para a etapa de análise. O trecho de LOG abaixo demonstra algumas uniões de palavras que aconteceram durante o processamento:    
+   Ao investigar a base de documentos visualmente, também foi verificada uma grande ocorrência de palavras quebradas que deveriam estar unidas (ex: ca pacitacação -> capacitação, traba lho -> trabalho). Para tentar resolver esse problema, foi proposta uma heurística sobre a sequência de tokens do texto. Se o *token i* concatenado ao *token i+1* formar uma palavra uma palavra integrante do vocabulário composto por todos documentos em questão, e cuja frequência dessa palavra unida seja maior que 25% da frequência dos tokens separados, então os 2 tokens adjacentes são transformados num único token. Para que essa estratégia funcionasse, foi preciso realizar uma primeira passada em todos os documentos para criar o vocabulário e calcular as frequências dos tokens. Os resultados foram satisfatórios e trouxeram maior qualidade para a etapa de análise. O trecho de LOG abaixo demonstra algumas uniões de palavras que aconteceram durante o processamento:    
 
 ```
-    2018-11-15 10:44:11,072 [DEBUG] - Unindo crit+erio    
-    2018-11-15 10:44:11,073 [DEBUG] - Unindo maqu+ina    
-    2018-11-15 10:44:11,099 [DEBUG] - Unindo mentori+ng    
-    2018-11-15 10:44:11,102 [DEBUG] - Unindo minis+trar    
-    2018-11-15 10:44:11,109 [DEBUG] - Unindo mer+cado    
-    2018-11-15 10:44:11,109 [DEBUG] - Unindo doce+ntes    
-    2018-11-15 10:44:11,109 [DEBUG] - Unindo integr+ada    
-    2018-11-15 10:44:11,109 [DEBUG] - Unindo oite+nta    
-    2018-11-15 10:44:11,126 [DEBUG] - Unindo univ+ersitaria    
-    2018-11-15 10:44:11,130 [DEBUG] - Unindo tra+nsferencia    
-    2018-11-15 10:44:11,132 [DEBUG] - Unindo amb+iente    
-    2018-11-15 10:44:11,137 [DEBUG] - Unindo enc+adernacao    
-    2018-11-15 10:44:11,142 [DEBUG] - Unindo w+indows    
-    2018-11-15 10:44:11,144 [DEBUG] - Unindo execut+iva    
-    2018-11-15 10:44:11,149 [DEBUG] - Unindo f+ormacao    
-    2018-11-15 10:44:11,152 [DEBUG] - Unindo vi+deo    
-    2018-11-15 10:44:11,163 [DEBUG] - Unindo te+cnicos        
+
+        2018-11-15 10:44:11,072 [DEBUG] - Unindo crit+erio    
+        2018-11-15 10:44:11,073 [DEBUG] - Unindo maqu+ina    
+        2018-11-15 10:44:11,099 [DEBUG] - Unindo mentori+ng    
+        2018-11-15 10:44:11,102 [DEBUG] - Unindo minis+trar    
+        2018-11-15 10:44:11,109 [DEBUG] - Unindo mer+cado    
+        2018-11-15 10:44:11,109 [DEBUG] - Unindo doce+ntes    
+        2018-11-15 10:44:11,109 [DEBUG] - Unindo integr+ada    
+        2018-11-15 10:44:11,109 [DEBUG] - Unindo oite+nta    
+        2018-11-15 10:44:11,126 [DEBUG] - Unindo univ+ersitaria    
+        2018-11-15 10:44:11,130 [DEBUG] - Unindo tra+nsferencia    
+        2018-11-15 10:44:11,132 [DEBUG] - Unindo amb+iente    
+        2018-11-15 10:44:11,137 [DEBUG] - Unindo enc+adernacao    
+        2018-11-15 10:44:11,142 [DEBUG] - Unindo w+indows    
+        2018-11-15 10:44:11,144 [DEBUG] - Unindo execut+iva    
+        2018-11-15 10:44:11,149 [DEBUG] - Unindo f+ormacao    
+        2018-11-15 10:44:11,152 [DEBUG] - Unindo vi+deo    
+        2018-11-15 10:44:11,163 [DEBUG] - Unindo te+cnicos        
 ```
 
-* **Stemming** - Por fim, a sequẽncia de termos pré-processados é reduzida ao seu radical usando o *stemmer* para Português **nltk.stem.RSLPStemmer**. Como o objetivo era entender o panorama das compras governamentais de um determinado serviço, era importante também contemplar termos legíveis nas análises. Para tanto, ao realizar o *stemming*, foi armazenado num dicionário as frequências de cada variação do radical, para que num pós-processamento a top-palavra fosse utilizada como representante daquele conjunto de termos. Abaixo segue uma entrada do dicionário de frequências, onde palavra **estimativas** é a melhor representante do radical **estim** e será usada por exemplo para representar todas as demais palavras desse radical numa nuvem de palavra:
+* **Stemming** - Por fim, a sequência de termos pré-processados foi reduzida ao seu radical usando o *stemmer* para Português **nltk.stem.RSLPStemmer**. Como o objetivo era entender o panorama das compras governamentais de um determinado serviço, era importante também contemplar termos legíveis nas análises. Para tanto, ao realizar o *stemming*, foram armazenadas num dicionário as frequências de cada variação do radical. Num pós-processamento do texto a top-palavra foi utilizada como representante daquele conjunto de palavras. Abaixo segue uma entrada do dicionário de frequências onde palavra **estimativas** é a melhor representante do radical **estim**:
 
 ```
-    "estim": {
-        "estimativas": 24,
-        "estimada": 4,
-        "estimados": 1,
-        "estimativa": 1,
-        "estimado": 3,
-        "estimadas": 1
-    },
+
+        "estim": {
+            "estimativas": 24,
+            "estimada": 4,
+            "estimados": 1,
+            "estimativa": 1,
+            "estimado": 3,
+            "estimadas": 1
+        },
 ```
 
    
@@ -435,7 +437,7 @@ Foram encontrada 41 suspeitas. Algumas delas:
 * A compra #2237 de valor 3359457.66 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15308006000101999)
 * A compra #2621 de valor 3054234.70 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/25000506001022002)
 
-A primeira suspeita acima, da compra #78, foi investigada no site do governo e apresentou dados de fato confusos. Sua descrição indica *"prestação de serviços de limpeza e conservação prediais"*. Já sua justificativa alega "entidade Jurídica de direito privado, sem fins lucrativos, especializada para desenvolvimento dos cursos de qualificação". Ademais, a descrição do único item que compõe a compra é: "realização de 50 cursos, atendendo 11 Estados da Federação, para qualificação de 2.000 (dois mil) Agentes Municipais de Trânsito, sendo 50 (cinquenta) turmas de 40 (quarenta) alunos cada." É importante destacar que pode também se tratar de um erro na base de dados.
+A primeira suspeita acima, da compra #78, foi investigada no site do governo e apresentou dados cuja interpretação de fato gera dúvidas. Sua descrição indica *"prestação de serviços de limpeza e conservação prediais"*. Já sua justificativa alega "entidade Jurídica de direito privado, sem fins lucrativos, especializada para desenvolvimento dos cursos de qualificação". Ademais, a descrição do único item que compõe a compra é: "realização de 50 cursos, atendendo 11 Estados da Federação, para qualificação de 2.000 (dois mil) Agentes Municipais de Trânsito, sendo 50 (cinquenta) turmas de 40 (quarenta) alunos cada." É importante destacar que pode também se tratar de um erro na base de dados.
 
 #### Resultado da identificação de compras suspeitas para o serviço 3239 (Transporte Rodoviário de Pessoas):
 
