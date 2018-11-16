@@ -441,9 +441,7 @@ Foram encontrada 41 suspeitas. Algumas delas:
 
 * A compra #78 de valor 3723691.94 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/20001206000012001)
 * A compra #2237 de valor 3359457.66 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15308006000101999)
-A compra #2621 de valor 3054234.70 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/25000506001022002)
-* A licitacao #3065 de valor 2855691.39 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/12010005000382009)
-* A compra #224 de valor 2797854.93 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/26400806000392002)
+* A compra #2621 de valor 3054234.70 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/25000506001022002)
 
 A primeira suspeita acima, da compra #78, foi avaliada no site do governo e apresentou dados de fato confusos. Sua descrição indica *"prestação de serviços de limpeza e conservação prediais"*. Já sua justificativa alega "entidade Jurídica de direito privado, sem fins lucrativos, especializada para desenvolvimento dos cursos de qualificação". Ademais, a descrição do único item que compõe a compra é: "realização de 50 cursos, atendendo 11 Estados da Federação, para qualificação de 2.000 (dois mil) Agentes Municipais de Trânsito, sendo 50 (cinquenta) turmas de 40 (quarenta) alunos cada." É importante destacar que pode também se tratar de um erro na base de dados.
 
@@ -457,5 +455,18 @@ Acurácias obtidas na validação cruzada com 5 folds: 98,52%, 98,52%, 99,00%, 9
 
 Foram encontrada 2 suspeitas, conforme segue:
 
-A licitacao #1063 de valor 43048801.96 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/25005203000892000)
-A licitacao #1725 de valor 3260659.88 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/25001502000012002)
+* A licitacao #1063 de valor 43048801.96 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/25005203000892000)
+* A licitacao #1725 de valor 3260659.88 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/25001502000012002)
+
+A primeira suspeita acima, da licitação #1063, foi avaliada no site do governo. É uma compra do Instituto Nacional do Câncer (INCA). Sua descrição é *"Serviços de locação de diversos tipos de veículos, ambulâncias e caminhões, para atenderem às necessidades das diversas Unidades do INCA, conforme especificações constantes do edital."* Os item de compra dela são milhares de diárias de ambulâncias para transporte de pacientes. Um fato que pode ser observado nesse caso, é que outras variáveis devem ser levadas em conta pelo classificador de suspeitas além da informação textual. Uma delas é a quantidade e a unidade do item de compra, pois ela pode revelar dimensões importantes sobre a compra que está sendo feita, ajudando o classificador por exemplo a diferenciar uma compra cara e numerosa e uma compra barata de poucas unidades de um mesmo tipo de material/serviço.
+
+## Conclusão
+
+Foi apresentado um sistema automatizado de coleta, extração, processamento e análise do texto das compras governamentais, sob a das faixas de menor e maior gastos de um determinado serviço. A execução do fluxo para dois serviços específicos foi realizada, e os resultados foram apresentados para ilustrar o potencial analítico do ferramental proposto. Foi possível exercitar diversos assuntos pertinentes aos tema recuperação da informação e mineração de textos. 
+
+O sistema demonstra alto grau de automatização, bastanto definir qual serviço será analisado para que o fluxo de trabalho seja executado, gerando documentos e figuras frutos da análise num diretório de saída.
+
+O trabalho pode ser expandido tanto com a coleta de dados de novos serviços, quanto com o aprimoramento do sistema. Algumas melhorias futuras incluem: fazer a coleta de materiais (hoje só coleta serviços), incluir novas dimensões na análise além do texto (ex: levar em conta a data, o local, dados do órgão que originou a compra, dados do fornecedor que ofereceu o serviço/material, etc.), além de ajustes finos nas estratégias definidas.
+
+_**Fim**_
+
