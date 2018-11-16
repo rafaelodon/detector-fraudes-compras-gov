@@ -73,14 +73,21 @@ class Analisador:
         logging.info("Analisando tópicos da "+categoria+" com LDA")
 
         logging.info("Criando dicionário")                    
-        docs = [row.texto_processado.split() for row in df.itertuples()]            
+        docs = []            
+        for row in df.itertuples():
+            tokens = row.texto_processado.split()
+            tokens_aux = []            
+            for t in tokens:
+                if t not in stopwords.words('portuguese'):
+                    tokens_aux.append(t)
+            docs.append(tokens_aux)
         dictionary = gensim.corpora.Dictionary(docs)            
 
         logging.info("Criando corpus")            
         corpus = [dictionary.doc2bow(text) for text in docs]
 
         logging.info("Gerando modelo LDA")
-        ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=3, id2word = dictionary, passes=3)        
+        ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=3, id2word = dictionary, passes=10)        
 
         p = pyLDAvis.gensim.prepare(ldamodel, corpus, dictionary)
         arquivo_html = constantes.DIR_OUT+'/lda_'+categoria+'.html'

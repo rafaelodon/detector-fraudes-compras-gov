@@ -383,12 +383,79 @@ Dentre os termos mais discrimantes da Faixa 1 do serviço 3239, de fato está a 
 
 Para confirmar algumas das suspeitas de temas em torno das compras, foi executado o algoritmo do LDA que observa a co-ocorrência de palavras nos documentos, gerando grupos de palavras que juntas representam tópicos que podem resumir os assuntos mais tratados em uma coleção de documentos. Para tanto foi utilizada a biblioteca **gensim**.
 
-O modelo de LDA foi ajustado para encontrar 3 tópicos com 3 passadas pela coleção de documentos de cada faixa de cada serviço.
+O modelo de LDA foi ajustado para encontrar 3 tópicos com 10 passadas pela coleção de documentos de cada faixa de cada serviço. É sabido que o LDA é uma abordagem supevisionada, e logo, não é possível saber de antemão a quantidade de tópicos e de palavras nos tópicos que melhor representará os assuntos em torno da coleção. Dessa forma, também foi utilizada a biblioteca **pyLDAvis** que gera visualizações navegáveis em HTML dos tópicos obtidos. (vide arquivos **lda*.html** na pasta **out**)
 
-### Tópicos identificados pelo LDA para a Faixa 1 do serviço 17663:
+Para fins de insights, foram incluídos abaixo uma breve lista das palavras dos tópicos obtidos.
 
-* **Tópico 1**: 0.027*"curso" + 0.019*"servidores" + 0.013*"com" + 0.009*"dos" + 0.008*"periodo" + 0.008*"ser" + 0.007*"realizado" + 0.006*"atender" + 0.006*"equipamentos" + 0.005*"conforme"
+#### Tópicos identificados pelo LDA para a Faixa 1 do serviço 17663:
 
-* **Tópico 2**: 0.022*"curso" + 0.014*"com" + 0.013*"servidores" + 0.011*"atender" + 0.010*"conforme" + 0.010*"anexo" + 0.008*"material" + 0.006*"especializada" + 0.006*"por" + 0.006*"dos"
+* **Tópico 1**: 0.032*"servidores" + 0.029*"curso" + 0.013*"material" + 0.012*"periodo" + 0.008*"realizado" + 0.008*"atender" + 0.007*"participacao" + 0.006*"brasilia" + 0.006*"capacitacao" + 0.006*"abaixo"
 
-* **Tópico 3**: 0.028*"servidores" + 0.024*"curso" + 0.014*"periodo" + 0.011*"material" + 0.009*"com" + 0.008*"dos" + 0.008*"abaixo" + 0.008*"brasilia" + 0.008*"participacao" + 0.007*"realizado"
+* **Tópico 2**: 0.014*"servidores" + 0.010*"periodo" + 0.009*"curso" + 0.008*"congresso" + 0.007*"brasilia" + 0.007*"memo" + 0.007*"silva" + 0.006*"atender" + 0.006*"realizado" + 0.006*"maria"
+
+* **Tópico 3**: 0.029*"curso" + 0.010*"especializacao" + 0.009*"conforme" + 0.008*"anexo" + 0.008*"ser" + 0.007*"atender" + 0.007*"especializada" + 0.006*"servidores" + 0.005*"aperfeicoamento" + 0.005*"profissional"
+
+#### Tópicos identificados pelo LDA para a Faixa 2 do serviço 17663:
+
+* **Tópico 1**: 0.023*"curso" + 0.015*"saude" + 0.015*"treinamento" + 0.010*"atender" + 0.010*"especializacao" + 0.009*"horas" + 0.008*"material" + 0.007*"ser" + 0.007*"capacitacao" + 0.006*"profissional"
+
+* **Tópico 2**: 0.033*"curso" + 0.021*"transito" + 0.017*"tecnica" + 0.014*"elaboracao" + 0.014*"area" + 0.012*"destinado" + 0.011*"sistema" + 0.010*"aplicacao" + 0.010*"capacitacao" + 0.009*"gestores"
+
+* **Tópico 3**: 0.025*"curso" + 0.015*"educacao" + 0.014*"graduacao" + 0.013*"ambiental" + 0.013*"material" + 0.011*"capacitacao" + 0.010*"instituicao" + 0.010*"processo" + 0.009*"pos" + 0.009*"servidores"
+
+No geral os tópicos giram em torno da capactiação de servidores, mas na Faixa 2 é possível de fato observar temática **saúde** no 1º tópico, **gestores** no 2º e **ambiental** no 3º.
+
+#### Tópicos identificados pelo LDA para a Faixa 1 do serviço 3239:
+
+* **Tópico 1**: 
+
+* **Tópico 2**: 
+
+* **Tópico 3**: 
+
+#### Tópicos identificados pelo LDA para a Faixa 2 do serviço 3239:
+
+* **Tópico 1**: 
+
+* **Tópico 2**: 
+
+* **Tópico 3**: 
+
+### Deteção de compras suspeitas
+
+Com base nas análises anteriores, e assumindo ingenuamente que a análise dos textos das faixas de gasto de um serviço podem discriminar compras de alto valor de compras de baixo valor, sugere-se que um modelo de automático possa aprender a classificar uma compra quanto a sua faixa de gasto com base no seu texto, para em seguida classificar as compras coletadas e levantar suspeitas de comrpas que estão na Faixa 2 mas deveriam estar na Faixa 1.
+
+Para tanto foi utilizado o classificador Random Forest com ajuda da classe **sklearn.ensemble.RandomForestClassifier**. Dado que temos 2000 features obtidas do vetorizador TF-IDF criado anteriormente, o classificador Random Forest foi testado e ajustado até apresentar uma alta acurácia, mas ainda sim gerando alguns falsos positivos para a Faixa 1, que serão tratados como suspeitos. A configuração configuração sugerido foi trabalhar com 5 árvores estimadoras e profundidade máxima 10 em cada árvore.
+
+A acurácia foi verificada com validação cruzada de 5 *folds*, e em seguida toda a coleção foi classificada automaticamente. Os suspeitos foram listados em um arquivo separado, ordenados do maior valor de compra para o menor, além de oferecer o link para o detalhe da compra/licitação no site do governo. (vide o arquivo **suspeitas.txt** no diretório **out**)
+
+#### Resultado da identificação de compras suspeitas para o serviço 17663 (Cursos de Especialização):
+
+Classes:
+ * Faixa 1 (gasto até 437236.17) - 2716 registros.
+ * Faixa 2 (acima de 437236.17) - 49 registros.
+
+Acurácias obtidas na validação cruzada com 5 folds: 98,19%, 98,19%, 98,01%, 98,19%, 98,36%.
+
+Foram encontrada 41 suspeitas. Algumas delas:
+
+* A compra #78 de valor 3723691.94 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/20001206000012001)
+* A compra #2237 de valor 3359457.66 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15308006000101999)
+A compra #2621 de valor 3054234.70 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/25000506001022002)
+* A licitacao #3065 de valor 2855691.39 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/12010005000382009)
+* A compra #224 de valor 2797854.93 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/26400806000392002)
+
+A primeira suspeita acima, da compra #78, foi avaliada no site do governo e apresentou dados de fato confusos. Sua descrição indica *"prestação de serviços de limpeza e conservação prediais"*. Já sua justificativa alega "entidade Jurídica de direito privado, sem fins lucrativos, especializada para desenvolvimento dos cursos de qualificação". Ademais, a descrição do único item que compõe a compra é: "realização de 50 cursos, atendendo 11 Estados da Federação, para qualificação de 2.000 (dois mil) Agentes Municipais de Trânsito, sendo 50 (cinquenta) turmas de 40 (quarenta) alunos cada." É importante destacar que pode também se tratar de um erro na base de dados.
+
+#### Resultado da identificação de compras suspeitas para o serviço 3239 (Transporte Rodoviário de Pessoas):
+
+Classes: 
+ * Faixa 1 (gasto até 1822154.05) - 999 registros.
+ * Faixa 2 (acima de 1822154.05) - 12 registros.
+
+Acurácias obtidas na validação cruzada com 5 folds: 98,52%, 98,52%, 99,00%, 99,00%, 99,00%
+
+Foram encontrada 2 suspeitas, conforme segue:
+
+A licitacao #1063 de valor 43048801.96 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/25005203000892000)
+A licitacao #1725 de valor 3260659.88 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/25001502000012002)

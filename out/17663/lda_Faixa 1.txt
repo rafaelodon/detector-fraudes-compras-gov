@@ -1,3 +1,3 @@
-0.027*"curso" + 0.019*"servidores" + 0.013*"com" + 0.009*"dos" + 0.008*"periodo" + 0.008*"ser" + 0.007*"realizado" + 0.006*"atender" + 0.006*"equipamentos" + 0.005*"conforme"
-0.022*"curso" + 0.014*"com" + 0.013*"servidores" + 0.011*"atender" + 0.010*"conforme" + 0.010*"anexo" + 0.008*"material" + 0.006*"especializada" + 0.006*"por" + 0.006*"dos"
-0.028*"servidores" + 0.024*"curso" + 0.014*"periodo" + 0.011*"material" + 0.009*"com" + 0.008*"dos" + 0.008*"abaixo" + 0.008*"brasilia" + 0.008*"participacao" + 0.007*"realizado"
+0.032*"servidores" + 0.029*"curso" + 0.013*"material" + 0.012*"periodo" + 0.008*"realizado" + 0.008*"atender" + 0.007*"participacao" + 0.006*"brasilia" + 0.006*"capacitacao" + 0.006*"abaixo"
+0.014*"servidores" + 0.010*"periodo" + 0.009*"curso" + 0.008*"congresso" + 0.007*"brasilia" + 0.007*"memo" + 0.007*"silva" + 0.006*"atender" + 0.006*"realizado" + 0.006*"maria"
+0.029*"curso" + 0.010*"especializacao" + 0.009*"conforme" + 0.008*"anexo" + 0.008*"ser" + 0.007*"atender" + 0.007*"especializada" + 0.006*"servidores" + 0.005*"aperfeicoamento" + 0.005*"profissional"

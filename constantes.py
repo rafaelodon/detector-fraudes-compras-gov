@@ -1,6 +1,6 @@
 # Defina qual serviço será analisado através da constante abaixo
-ID_SERVICO = '17663' # Curso Aperfeiçoamento / Especialização Profissional
-#ID_SERVICO = '3239' #Transporte Rodoviário - Pessoal por Automóveis
+#ID_SERVICO = '17663' # Curso Aperfeiçoamento / Especialização Profissional
+ID_SERVICO = '3239' #Transporte Rodoviário - Pessoal por Automóveis
 
 # Diretórios
 DIR_CACHE = './cache'

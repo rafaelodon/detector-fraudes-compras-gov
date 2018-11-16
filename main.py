@@ -33,11 +33,11 @@ def main():
     #processador.processar_texto()    
     #processador.atualizar_valores_com_selic()    
 
-    #analisador = Analisador()      
+    analisador = Analisador()      
     #analisador.analisar_valores()
     #analisador.gerar_tagclouds()    
     #analisador.avaliar_features_naive_bayes()    
-    #analisador.analisar_topicos()    
+    analisador.analisar_topicos()    
     #analisador.identificar_compras_suspeitas()    
     
 if __name__ == "__main__":    
