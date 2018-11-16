@@ -132,11 +132,9 @@ As decisões de pré-processamento do texto acima descritas, foram feitas iterat
 | --- | --- |
 |  *Frete de veiculo no percurso redencao/kikretum/redencao.. Objeto: Pregão Eletrônico -  Contratação de emp resa especializada em serviço de instalação de linha de gases especiais.Justificativa: Conduzindo professores para a aldeia kikretum.* | *frete veiculos percurso redencao kikretum redencao empresa especializada instalacao linha gases especial conduzir professores aldeia kikretum* |
 
-O processamento final feito sobre o texto foi o ajuste de um vetorizado, através do **sklean.feature_extraction.text.TfidfVectorizer**. Esse objeto recebe como entrada o texto pré-processado de cada documento, e ajusta-se para fazer o cálculo do TF-IDF (Term Frequency - Inverse Document Frequncy). Essa medida que traduz a frequência de um termo (TF) naquela coleção, porém levando em conta que termos frequentes em muitos documentos são menos discriminantes (IDF).
+O processamento final feito sobre o texto tem como objetivo ajustar um vetorizador de documentos com o **sklean.feature_extraction.text.TfidfVectorizer**. Esse objeto recebe como entrada o texto pré-processado de cada documento, e ajusta-se para fazer o cálculo do TF-IDF (Term Frequency - Inverse Document Frequncy). Essa medida traduz a frequência de um termo (TF) naquela coleção, porém levando em conta que termos frequentes em muitos documentos são menos discriminantes (IDF).
 
-O vetorizador foi configurado para trabalhar com **2000 palavras**, cada uma sendo uma dimensão do vetor que representa um documento no espaço vetorial, ao estilo *bag-of-words*. O vetorizador também foi configurado para ignorar *stopwords* da língua portuguesa através da lista pronta disponível no **nltk.corpus.stopwords**.
-
-Após ajustado, o vetorizador é serializado para ser usado durante a análise sempre que é necessário avaliar as frequências dos termos da coleção ou vetorizar um conjunto de documentos para fornecer como entrada de outras ferramentas.
+O vetorizador foi configurado para trabalhar com **2000 palavras**, cada uma sendo uma dimensão do vetor que representa um documento no espaço vetorial, ao estilo *bag-of-words*. O vetorizador também foi configurado para ignorar *stopwords* da língua portuguesa através da lista pronta disponível no **nltk.corpus.stopwords**. Após ajustado, o vetorizador é serializado para ser usado durante a análise sempre que é necessário avaliar as frequências dos termos da coleção ou vetorizar um conjunto de documentos para fornecer como entrada de outras ferramentas.
 
 Uma outra parte do processamento, não relacionada ao texto, foi o atualização monetária dos valores das compras pela taxa SELIC. Isso permitirá a análise mais justa das faixa de gasto maior e menor das compras durante a análise, evitando que compras mais antigas pareçam ser mais baratas que compras mais atuais devido à inflação do período.
 
@@ -144,7 +142,7 @@ Uma outra parte do processamento, não relacionada ao texto, foi o atualização
 
 ### Definição das faixas de gasto
 
-Uma análise estatística descritiva foi feito sobre os valores das compras de ambos os serviços. Em ambos os casos, verificou-se que, conforme demonstrado nas tabelas e nos gráficos abaixo, os valores de compras mais altos só ocorrem próximos do percentil 98, 99. Ou seja, a maior parte das compras tem valores moderados se comparadas com os valores máximos.
+Uma análise estatística descritiva foi feito sobre os valores das compras de ambos os serviços. Verificou-se que, conforme demonstrado nas tabelas e nos gráficos abaixo, os valores de compras mais altos só ocorrem próximos do percentil 98, 99. Ou seja, a maior parte das compras tem valores moderados se comparadas com os valores máximos.
 
 #### Tabela 1: estatística descritiva do serviço 17663 (Cursos)
 
