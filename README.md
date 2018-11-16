@@ -9,43 +9,42 @@
 ## Introdução
 
 O presente trabalho busca exercitar técnicas de recuperação de informação e de mineração de texto através do desenvolvimento de um sistema que coleta, extrai, processa e analisa sob determinadas óticas o conteúdo textual descritivo de uma amostra das compras do Governo Federal.
-Os dados observados encontram-se disponíveis publicamente no site de [http://compras.dados.gov.br](http://compras.dados.gov.br).
+Os dados observados encontram-se disponíveis publicamente no site de de **Compras Governamentais** ([http://compras.dados.gov.br](http://compras.dados.gov.br)).
 
-As compras feitas pelo governo podem ser do tipo **com licitação** ou **sem licitação**, e são categorizadas com ajuda de um catálogo de **serviços** e **materiais** que agrupa compras de segmentos semelhantes. No enatnto, o volume de informações e a complexidade da base torna difícil contemplar as características gerais do comportamento de compra por parte das entidades públicas.
-
-Afim de demonstrar o potencial de uma ferramenta automatizada para auxiliar na recuperação e análise em torno do texto dessas compras, foram selecionados apenas 2 serviços específicos do catálogo:
+As compras feitas pelo governo podem ser do tipo **com licitação** ou **sem licitação**, e são categorizadas com ajuda de um catálogo de **serviços** e **materiais** que agrupa compras de segmentos semelhantes. No entanto, o volume de informações e a complexidade da base torna difícil contemplar as características gerais do comportamento de compra por parte das entidades públicas. Uma forma de obter um panorama dos assuntos em torno das compras de um determinado serviço ou material pode ser avaliando as palavras que melhor descrevem o universo de cada categoria. A fim de demonstrar o potencial de uma ferramenta automatizada para auxiliar na recuperação e análise em torno do texto dessas compras, foram selecionados 2 serviços específicos do catálogo para serem analisados automaticamente pelo sistema proposto:
 
  - Serviço 17663: Curso Aperfeiçoamento / Especialização Profissional
  - Serviço 3239: Transporte Rodoviário - Pessoal por Automóveis
 
-Em resumo, foram coletadas todas compras com e sem licitação desses dois serviços, e o conteúdo textual descritivo desses documentos foi extraído, processado e utilizado para gerar *insights*. As compras foram classificadas quanto à faixa de gasto a partir de uma análise da estatística descritiva. Em seguida, foram geradas nuvens de palavras destacando os termos descritivos de maior frequência para o **grupo de gastos menores** e para o **grupo de gastos maiores**. Um modelo de classificação *Naive Bayes* foi utilizado para verificar os termos que mais contribuiram para discriminar cada uma dessas classes. Também foi aplicada a técnica LDA (*Latent Dirichlet Allocation*) de detecção de tópicos em cada um desses grupos para verificar a co-ocorrência de termos nos conjunto de documentos. Por fim, uma estratégia de detecção de compras suspeitas foi proposta.
+Em resumo, foram coletadas todas compras com e sem licitação desses dois serviços, e o conteúdo textual descritivo desses documentos foi extraído, processado e utilizado para gerar *insights*. As compras foram **classificadas quanto à faixa de gasto** a partir de uma **análise da estatística descritiva** inicial. Em seguida, foram geradas **nuvens de palavras** destacando os termos descritivos de maior frequência para o **grupo de gastos menores** e para o **grupo de gastos maiores**. Um modelo de classificação *Naive Bayes* foi utilizado para verificar os **termos que mais discriminantes** em cada um dos grupos. Também foi aplicada a técnica LDA (*Latent Dirichlet Allocation*) de **detecção de tópicos** em cada um desses grupos para verificar a co-ocorrência de termos nos conjunto de documentos, para cada faixa de cada serviço. Por fim, uma estratégia de **detecção de compras suspeitas** foi proposta.
 
-O sistema foi construído em Python 3.5 com ajudas de bibliotecas tais como *Pandas*, *Nltk*, *Scikit-Learn*, *Gensim*, *Matplotlib*, *Wordcloud* dentre outras. O código foi separado em classes conforme as responsabilidades do fluxo de trabalho: **Coletor**, **Extrator**, **Processador** e **Analisador**.
+O sistema foi construído em Python 3.5 com ajudas de bibliotecas tais como *Pandas*, *Nltk*, *Scikit-Learn*, *Gensim*, *Matplotlib*, *Wordcloud* dentre outras. O código foi separado em classes conforme as responsabilidades do fluxo de trabalho: **Coletor**, **Extrator**, **Processador** e **Analisador**. O sistema demonstra alto grau de automatização, bastanto definir qual serviço será avaliado no arquivo **constantes.py** e executando as etapas do fluxo através do arquivo **main.py**. As respostas da coleta são armazenadas no diretório **cache**, os dados intermediários do fluxo são armazenados no diretório **data**, separados por serviço. Os documentos e figuras frutos das análises são armazenados no diretório **out**, também separados por serviço.
 
 Cada uma das etapas será melhor descrita nas seções seguintes, bem como as observações e conclusões obtidas após as análises feitas.
 
 ## Coleta dos documentos
 
-O site http://compras.dados.gov.br não só permite navegar pelos dados através de sua interface em HTML, mas também oferece APIs que retornam documentos Json.
+O site http://compras.dados.gov.br não só permite navegar pelos dados através de sua interface em HTML, mas também oferece APIs que retornam documentos JSON.
 Há uma [API própria para as licitações](http://compras.dados.gov.br/docs/lista-metodos-licitacoes.html), e outra [API própria para as compras sem licitação](http://compras.dados.gov.br/docs/lista-metodos-compraSemLicitacao.html). 
-Ambas possuem características diferentes mas permitem igualmente consultar uma numerosa lista paginada com todas as compras de um determinado serviço. Em ambas as APIs, uma compra pode envolver mais de um item, e assim é preciso também fazer novos acessos para encontrar os detalhes textuais daquele item.
+Ambas possuem características diferentes mas permitem igualmente consultar uma numerosa lista paginada com todas as compras de um determinado serviço. Em ambas as APIs, uma compra pode envolver mais de um item, e por isso é preciso também fazer um novo acesso a partir de cada compra para encontrar os detalhes textuais de seus itens.
  
-Foi desenvolvida uma estratégia de coletada automatizada que busca todas as compras e licitações de um determinado serviço, com seus respectivos itens.
-A classe **Coletor** é responsável por essa parte do fluxo de trabalho, navegando pelas APIs, indo para as próximas páginas quando essas existem e guardando todas as respostas Json obtidas num **diretório de cache**.
-Dessa forma, ao ser re-executada, as compras já coletadas não são re-visitadas. Com isso, uma vez finalizada a coleta de todas as respostas das compras de um serviço é possível trabalhar *offline* sem a necessidade de acessar a API novamente.
+Foi desenvolvida uma estratégia de **coleta automatizada** que busca todas as compras e licitações de um determinado serviço a partir de seus código. 
+A classe **Coletor** é responsável por essa parte do fluxo de trabalho, navegando pelas APIs, indo para as próximas páginas quando essas existem e guardando todas as respostas JSON obtidas no **diretório de cache**.
+Com isso, ao ser reexecutada a coleta, as compras já coletadas não são revisitadas. Assim, uma vez finalizada a coleta de todas as respostas das compras de um determinado serviço, é possível trabalhar *offline* sem a necessidade de acessar a API novamente.
 
-Foi executada a coleta tanto para o [serviço 17663](http://compras.dados.gov.br/servicos/doc/servico/17663) (Curso Aperfeiçoamento / Especialização Profissional) quanto para o [serviço 3239](http://compras.dados.gov.br/servicos/doc/servico/3239) (Transporte Rodoviário - Pessoal por Automóveis). 
-Ao fim das coletas, constaram mais de 40 mil arquivos JSON no direótório de cache. Novos serviços podem ser coletados se houver interesse.
+Foi executada a coleta tanto para o [serviço 17663](http://compras.dados.gov.br/servicos/doc/servico/17663) (*Curso Aperfeiçoamento / Especialização Profissional*) quanto para o [serviço 3239](http://compras.dados.gov.br/servicos/doc/servico/3239) (*Transporte Rodoviário - Pessoal por Automóveis*). 
+Ao fim das coletas, constaram mais de 40 mil arquivos JSON no direótório de cache.
+Novos serviços podem ainda ser coletados se houver interesse futuro.
 
-Além da navegação nas APIs de compras, também foi feita uma coleta simples da página de divulgação oficial da taxa SELIC (https://www.bcb.gov.br/pec/copom/port/taxaselic.asp), afim de subsidiar a atualização monetária dos valores das compras durante a análise.
+Além da navegação nas APIs de compras, também foi feita a coleta da **página de divulgação oficial da taxa SELIC** no Banco Central (https://www.bcb.gov.br/pec/copom/port/taxaselic.asp), afim de subsidiar a atualização monetária dos valores das compras durante a análise.
 
-As coletas ocorreram entre 30/10/2018 e 15/11/2018.
+As coletas das análises exemplificadas nesse projeto ocorreram entre 30/10/2018 e 15/11/2018.
 
 ## Extração de dados
 
-Mediante a coleta finalizada dos documentos de um serviço, o **Extrator** é responsável por fazer o *parse* dos documentos coletados, organizando as informações em um banco de dados relacional SQLite3 que torna fácil consultar as informações dos documentos.
+Mediante a coleta finalizada dos documentos de um serviço, o **Extrator** é responsável por fazer o *parse* dos documentos coletados, organizando as informações em um banco de dados relacional SQLite3 que torna fácil consultar as informações dos documentos em etapas posteriores.
 
-Foram extraídos e armazenados como registros de uma tabela de documentos os seguintes dados: 
+Os dados extraídos à respeito de uma compra compoem um registro na **tabela de documentos**, conforme segue:
 
  * Id da Compra
  * Id do Serviço 
@@ -57,9 +56,9 @@ Foram extraídos e armazenados como registros de uma tabela de documentos os seg
 
 Após a extração dos dados das compras, o banco de dados apresentou 3396 documentos do serviço 17663 (especialização) e 1842 documentos do serviço 3239 (transporte rodoviário).
 
-Cada serviço tem os seus dados armazenados num banco separado, facilitando o manuseio nas etapas posteriores, já que as análises planejadas são feitas separadamente por serviço. A  presença da coluna **Tipo** torna o banco preparado para ser multi-serviço se necessáario. Ademais, a re-execução do **Extrator** apaga o banco e cria um novo, mas há como desligar essa abordagem.
+Cada serviço tem os seus dados armazenados num banco separado, facilitando o manuseio nas etapas posteriores, já que as análises planejadas são feitas separadamente. A presença da coluna **Tipo** torna o banco preparado para ser multi-serviço se necessáario. Ademais, a re-execução do **Extrator** apaga o banco e cria um novo, mas há como desligar essa abordagem através de uma opção na inicialização do **Extrator**.
 
-O extrator também é responsável por fazer o *scraping* do HTML da página com o histórico da taxa SELIC mensal desde 1997, recuperando as células da tabela através de expressões *XPath* e armazenando os dados  obtidos numa tabela onde consta:
+O **Extrator** também é responsável por fazer o *scraping* do HTML da página com o histórico da taxa SELIC. Essa página contem uma grande tabela com dados mensais da taxa desde 1997. O conteúdo de determinadas células dessa tabela foi extraído através de expressões *XPath*. Os dados foram armazenando numa tabela onde consta:
 
  * Data início (DATE)
  * Data fim (DATE)
@@ -67,7 +66,7 @@ O extrator também é responsável por fazer o *scraping* do HTML da página com
 
 ## Processamento dos dados
 
-O **Processador** assume a existência do banco de dados relacional SQLite3 fruto da execução do **Extrator**, e a partir dele cria novas colunas e arquivos de apoio com dados que irão subsidiar a análise.
+O **Processador** assume a existência do banco de dados relacional SQLite3 fruto da execução do **Extrator**, e a partir dele cria novas colunas e arquivos de apoio intermediários com dados que irão subsidiar a etapa análise seguinte.
 
 A primeira responsabilidade do **Processador** é pré-processar o conteúdo textual de cada documento para tornar possível a criação de um bag-of-words mais otimizado que dará suporte às análises sobre os termos. O pré-processamento do texto incluiu:
 
@@ -81,49 +80,40 @@ A primeira responsabilidade do **Processador** é pré-processar o conteúdo tex
 
 * **Remoção de palavras do domínio** - Algumas expressões específicas do assunto Compras Goveernamentais estavam presentes nos documentos mas não contribuiram para uma boa compreensão do conteúdo das compras através da frequência de teremos. Sendo assim alguns termos foram removidos:
     
-    ```{python}
+```
     REMOVER = [ 'pregao eletronico', 'pregao', 'aquisicao', 'valor',
       'limite' 'licitacao', 'licitacao', 'justificativa', 'edital',
       'contratacao', 'fornecimento', 'prestacao', 'precos', 'preco',
       'formacao','empresa', 'servico', 'servicos', 'inscricao',
       'pagamento', 'taxa','para', 'objeto' ]
-    ```
+```
 
 * **União de palavras quebradas:**
-   Ao investigar a base de documentos visualmente, foi verificada uma grande ocorrência de palavras quebradas que deveriam estar unidas (ex: ca pacaitacação -> capacitação, traba lho -> trabalho).
-   Para tenta resolver esse problema, foi proposta uma heurística sobre a sequência de tokens do texto. Se o *token i* concatenado ao *token i+1* formar uma palavra uma palavra integrante do vocabulário composto por todos documentos em questão, cuja frequência dessa palavra unida seja maior que 25% da frequência dos tokens separados, então os 2 tokens adjacentes são transformados num único token concatenado.
-   
-   Para que essa estratégia funcionasse foi preciso realizar uma primeira passada em todos os documentos para criar esse vocabulário e calcular as frequências dos tokens. Os resultados foram satisfatórios e trouxeram maior qualidade para a etapa de análise.
+   Ao investigar a base de documentos visualmente, foi verificada uma grande ocorrência de palavras quebradas que deveriam estar unidas (ex: ca pacaitacação -> capacitação, traba lho -> trabalho). Para tenta resolver esse problema, foi proposta uma heurística sobre a sequência de tokens do texto. Se o *token i* concatenado ao *token i+1* formar uma palavra uma palavra integrante do vocabulário composto por todos documentos em questão, cuja frequência dessa palavra unida seja maior que 25% da frequência dos tokens separados, então os 2 tokens adjacentes são transformados num único token concatenado. Para que essa estratégia funcionasse foi preciso realizar uma primeira passada em todos os documentos para criar esse vocabulário e calcular as frequências dos tokens. Os resultados foram satisfatórios e trouxeram maior qualidade para a etapa de análise. O trecho de LOG abaixo demonstra algumas uniões de palavras que aconteceram durante o processamento:    
 
-   O trecho de LOG abaixo demonstra algumas uniões de palavras que aconteceram durante o processamento:    
+```
+    2018-11-15 10:44:11,072 [DEBUG] - Unindo crit+erio    
+    2018-11-15 10:44:11,073 [DEBUG] - Unindo maqu+ina    
+    2018-11-15 10:44:11,099 [DEBUG] - Unindo mentori+ng    
+    2018-11-15 10:44:11,102 [DEBUG] - Unindo minis+trar    
+    2018-11-15 10:44:11,109 [DEBUG] - Unindo mer+cado    
+    2018-11-15 10:44:11,109 [DEBUG] - Unindo doce+ntes    
+    2018-11-15 10:44:11,109 [DEBUG] - Unindo integr+ada    
+    2018-11-15 10:44:11,109 [DEBUG] - Unindo oite+nta    
+    2018-11-15 10:44:11,126 [DEBUG] - Unindo univ+ersitaria    
+    2018-11-15 10:44:11,130 [DEBUG] - Unindo tra+nsferencia    
+    2018-11-15 10:44:11,132 [DEBUG] - Unindo amb+iente    
+    2018-11-15 10:44:11,137 [DEBUG] - Unindo enc+adernacao    
+    2018-11-15 10:44:11,142 [DEBUG] - Unindo w+indows    
+    2018-11-15 10:44:11,144 [DEBUG] - Unindo execut+iva    
+    2018-11-15 10:44:11,149 [DEBUG] - Unindo f+ormacao    
+    2018-11-15 10:44:11,152 [DEBUG] - Unindo vi+deo    
+    2018-11-15 10:44:11,163 [DEBUG] - Unindo te+cnicos        
+```
 
-   ```
-    ...
-    2018-11-15 10:44:11,072 [DEBUG] - Unindo crit+erio
-    2018-11-15 10:44:11,073 [DEBUG] - Unindo maqu+ina
-    2018-11-15 10:44:11,099 [DEBUG] - Unindo mentori+ng
-    2018-11-15 10:44:11,102 [DEBUG] - Unindo minis+trar
-    2018-11-15 10:44:11,109 [DEBUG] - Unindo mer+cado
-    2018-11-15 10:44:11,109 [DEBUG] - Unindo doce+ntes
-    2018-11-15 10:44:11,109 [DEBUG] - Unindo integr+ada
-    2018-11-15 10:44:11,109 [DEBUG] - Unindo oite+nta
-    2018-11-15 10:44:11,126 [DEBUG] - Unindo univ+ersitaria
-    2018-11-15 10:44:11,130 [DEBUG] - Unindo tra+nsferencia
-    2018-11-15 10:44:11,132 [DEBUG] - Unindo amb+iente
-    2018-11-15 10:44:11,137 [DEBUG] - Unindo enc+adernacao
-    2018-11-15 10:44:11,142 [DEBUG] - Unindo w+indows
-    2018-11-15 10:44:11,144 [DEBUG] - Unindo execut+iva
-    2018-11-15 10:44:11,149 [DEBUG] - Unindo f+ormacao
-    2018-11-15 10:44:11,152 [DEBUG] - Unindo vi+deo
-    2018-11-15 10:44:11,163 [DEBUG] - Unindo te+cnicos    
-    ...
-   ```
+* **Stemming** - Por fim, a sequẽncia de termos pré-processados é reduzida ao seu radical usando o *stemmer* para Português **nltk.stem.RSLPStemmer**. Como o objetivo era entender o panorama das compras governamentais de um determinado serviço, era importante também contemplar termos legíveis nas análises. Para tanto, ao realizar o *stemming*, foi armazenado num dicionário as frequências de cada variação do radical, para que num pós-processamento a top-palavra fosse utilizada como representante daquele conjunto de termos. Abaixo segue uma entrada do dicionário de frequências, onde palavra **estimativas** é a melhor representante do radical **estim** e será usada por exemplo para representar todas as demais palavras desse radical numa nuvem de palavra:
 
-* **Stemming** - Por fim, a sequẽncia de termos pré-processados é reduzida ao seu radical usando o *stemmer* para Português **nltk.stem.RSLPStemmer**. Como o objetivo era entender o panorama das compras governamentais de um determinado serviço, era importante também contemplar termos legíveis nas análises. Para tanto, ao realizar o *stemming*, foi armazenado num dicionário as frequências de cada variação do radical, para que num pós-processamento a top-palavra fosse utilizada como representante daquele conjunto de termos.
-
-   Abaixo segue uma entrada do dicionário de frequências:
-
-    ```
+```
     "estim": {
         "estimativas": 24,
         "estimada": 4,
@@ -132,29 +122,28 @@ A primeira responsabilidade do **Processador** é pré-processar o conteúdo tex
         "estimado": 3,
         "estimadas": 1
     },
-    ```
+```
 
-    No caso acima, a palavra **estimativas** é a melhor representante do radical **estim**, e será usada por exemplo para representar todas as demais palavras desse radical numa nuvem de palavra.
-
-As decisões de pré-processamento do texto acima descritam foram feitas iterativamente com as análises, principalmente observando a qualidade da nuvem de palavra. O pré-processamento foi primordial para gerar uma nuvem com menos 'sujeira' e com frequências mais significativas para determinados assuntos. Abaixo segue um exemplo do texto antes e depois do processamento:
+   
+As decisões de pré-processamento do texto acima descritas, foram feitas iterativamente com as análises, principalmente observando a qualidade da nuvem de palavra. O pré-processamento foi primordial para gerar uma nuvem com menos 'sujeira' e com frequências mais significativas para determinados os assuntos das compras. Abaixo segue um exemplo do texto antes e depois do processamento:
 
 | Texto puro | Texto processsado |
 | --- | --- |
 |  *Frete de veiculo no percurso redencao/kikretum/redencao.. Objeto: Pregão Eletrônico -  Contratação de emp resa especializada em serviço de instalação de linha de gases especiais.Justificativa: Conduzindo professores para a aldeia kikretum.* | *frete veiculos percurso redencao kikretum redencao empresa especializada instalacao linha gases especial conduzir professores aldeia kikretum* |
 
-O processamento final feito sobre o texto foi o ajuste de um objeto do tipo **sklean.feature_extraction.text.TfidfVectorizer** que recebeu como entrada o texto pré-processado de cada documento, e ajustou-se para fazer o cálculo do TF-IDF (Term Frequency - Inverse Document Frequncy), que é uma medida que traduz a frequência de um termo naquela coleção de documentos, levando em conta também que termos frequentes em mutos documentos são menos discriminantes.
+O processamento final feito sobre o texto foi o ajuste de um vetorizado, através do **sklean.feature_extraction.text.TfidfVectorizer**. Esse objeto recebe como entrada o texto pré-processado de cada documento, e ajusta-se para fazer o cálculo do TF-IDF (Term Frequency - Inverse Document Frequncy). Essa medida que traduz a frequência de um termo (TF) naquela coleção, porém levando em conta que termos frequentes em muitos documentos são menos discriminantes (IDF).
 
-O vetorizador foi configurado para trabalhar com 2000 palavras, cada uma sendo uma dimensão do *bag-of-words* final que pode representar um documento no espaço vetorial. O vetorizador também foi configurado para ignorar stopwords da língua Portuguesa através do **nltk.corpus.stopwords**.
+O vetorizador foi configurado para trabalhar com **2000 palavras**, cada uma sendo uma dimensão do vetor que representa um documento no espaço vetorial, ao estilo *bag-of-words*. O vetorizador também foi configurado para ignorar *stopwords* da língua portuguesa através da lista pronta disponível no **nltk.corpus.stopwords**.
 
-Esse vetorizador foi serializado para ser usado durante a análise sempre que fosse necessário avaliar as frequências dos termos da coleção, ou vetorizar um conjunto de documentos.
+Após ajustado, o vetorizador é serializado para ser usado durante a análise sempre que é necessário avaliar as frequências dos termos da coleção ou vetorizar um conjunto de documentos para fornecer como entrada de outras ferramentas.
 
-Outra parte do processamento, não relacionada ao texto, foi o atualização monetária dos valores das compras pela taxa SELIC, permitindo assim uma análise mais justa das faixa de gasto maior e menor das compras durante a análise.
+Uma outra parte do processamento, não relacionada ao texto, foi o atualização monetária dos valores das compras pela taxa SELIC. Isso permitirá a análise mais justa das faixa de gasto maior e menor das compras durante a análise, evitando que compras mais antigas pareçam ser mais baratas que compras mais atuais devido à inflação do período.
 
 ## Análise
 
 ### Definição das faixas de gasto
 
-Uma análise estatística descritiva foi feito sobre os valores das compras de ambos os serviços. Em ambos os casos, verificou-se que, conforme é possível ver nas tabelas e nos gráficos, os valores de compras mais altos só ocorrem próximos do percentil 98, 99. Ou seja, a maior parte das compras tem valores moderados se comparadas com os valores máximos.
+Uma análise estatística descritiva foi feito sobre os valores das compras de ambos os serviços. Em ambos os casos, verificou-se que, conforme demonstrado nas tabelas e nos gráficos abaixo, os valores de compras mais altos só ocorrem próximos do percentil 98, 99. Ou seja, a maior parte das compras tem valores moderados se comparadas com os valores máximos.
 
 #### Tabela 1: estatística descritiva do serviço 17663 (Cursos)
 
@@ -202,15 +191,15 @@ Uma análise estatística descritiva foi feito sobre os valores das compras de a
 #### Figura 1 - Histograma dos valores do Serviço 17663 (Cursos)
 ![](out/3239/histograma_valores.png?raw=true)
 
-Para definir o ponto de corte da faixa de menor gasto para para a faixa de maior gasto, foram feitas algumas tentativas. Por fim, optou-se por uma regra que demonstrou chegar num valor adequado para ambos os serviços. O **valor de corte** foi definido como sendo a **média** somada com **1 desvio**.
+Para definir um ponto de corte da **faixa de menor gasto** para para a **faixa de maior gasto**, foram feitas algumas tentativas durante uma etapa exploratória. Por fim, chegou-se a uma regra que demonstrou calcular num valor adequado de corte para ambos os serviços. O **valor de corte** ficou sendo a **média** somada com **1 desvio**.
 
 Com essa abordagem, o ponto de corte do seviço 17663 foi o percentil 98.227848, e o do serviço 3239 foi o percentil 98.813056.
 
 ### Frequência de termos
 
-O **Analisador** utiliza os valores TF-IDF advindos do processamento para gerar nuvens de palavras em que os termos com valores de frequências mais altas ficam em destaque. As nuvens foram construídas através do objeto **wordcloud.WordCloud** e foram criadas nuvens separadas para cada faixa de gasto, sendo que a **Faixa 1** é a faixa de menor gasto, e a **Faixa 2** é a faixa de maior gasto.
+O **Analisador** utiliza os valores TF-IDF advindos do processamento para gerar nuvens de palavras. Nessas nuvens, os termos com valores de frequências mais altos ficam em destaque. As nuvens foram construídas através da biblioteca **wordcloud** e foram criadas nuvens separadas para cada faixa de gasto. A **Faixa 1** é a faixa de menor gasto, e a **Faixa 2** é a faixa de maior gasto.
 
-Também foram gerados na saída, arquivos contendo a lista de palavras mais frequentes, já que a nuvem, apesasr de visualmente atraente, não é muito boa para uma análise cautelosa comparativa entre os conjuntos de termos. (vide arquivos **termos_Faixa1.md** e **termos_Faixa2.md** nas pasta **out** )
+Apesar da nuvem ser visualmente atraente, também foram gerados na saída arquivos contendo a lista de palavras mais frequentes, ordenada de forma decrescente por frequência. (vide arquivos **termos_Faixa1.md** e **termos_Faixa2.md** nas pasta **out** )
 
 #### Nuvens de palavras do serviço 17663 (Cursos de Especialização)
 
@@ -218,7 +207,7 @@ Também foram gerados na saída, arquivos contendo a lista de palavras mais freq
 
 ![](out/17663/tagcloud_Faixa2.png?raw=true)
 
-É possível observar nas nuvens do serviço 17663 que grande parte das compras se relacionam de fato com investimento em aperfeiçoamento de servidores, sendo eles através de cursos, treinamentos, especializaçõões, materiais educativos, congressos. Destaca-se na nuvem da Faixa 2 o termo **saúde** que sugere que podem existir gastos mais elevados nessa área de formação.
+É possível observar nas nuvens do serviço 17663 que grande parte das compras se relacionam de fato com investimento em educação de servidores federais, sendo eles através de cursos, treinamentos, especializaçõões, materiais educativos, congressos. Destaca-se na nuvem da Faixa 2 o termo **saúde** que sugere a existência de gastos mais elevados nessa área de formação.
 
 #### Nuvens de palavras do serviço 3239 (Transporte Rodoviário de Pessoas)
 
@@ -226,13 +215,13 @@ Também foram gerados na saída, arquivos contendo a lista de palavras mais freq
 
 ![](out/3239/tagcloud_Faixa2.png?raw=true)
 
-As nuvens de palavras do serviço 3239 sugerem compras em torno de serviços de transporte, frete, contratação de motorista, aluguel de veículos. Mas chama a atenção na Faixa 1, de menor gasto, as palavras índios, indigena e aldeia, revelando um tipo de gasto governamental de pouca visibilidade.
+As nuvens de palavras do serviço 3239 sugerem compras em torno de serviços de transporte, frete, contratação de motorista, aluguel de veículos. Chama a atenção na Faixa 1, de menor gasto, as palavras **índios**, **indígena** e **aldeia**, revelando um tipo de gasto governamental de pouca visibilidade.
 
-### Anális de Termos Discriminantes
+### Análise de Termos Discriminantes
 
-Afim de comprovar de fato os termos que discriminam uma faixa de gasto da outra, surgiu a idéia de ajustar um classificador *Naive Bayes* para que as informações do cálculo das probabilidades de cada classe pudesse ser usado como um ranking das palavras mais importantes. Dessa forma, foi utilizado o **sklearn.naive_bayes.GaussianNB**, primeiramente fazendo um treino com validação cruzada de 5 *folds* para medir sua acurácia, e em seguida ajustando-se com toda a base para gerar a informação probabilística.
+A fim de comprovar de fato os termos que discriminam uma faixa de gasto da outra, surgiu a idéia de ajustar um classificador *Naive Bayes* para que as informações do cálculo das probabilidades de cada classe pudessem ser usadas para ranqueio das palavras mais importantes. Foi utilizado a classe **sklearn.naive_bayes.GaussianNB** para criaçaõ do classificador. Primeiramente foi um treino com validação cruzada de 5 *folds* para medir sua acurácia, que mostrou-se elevada. Em seguida o modelo foi ajustando com toda a base para gerar a informação probabilística das palavras em relação às faixas de gastos.
 
-Foi observado a informação da variância (*sigma*) e da média (*theta*)da feature por classe para rankear as top-palavras de cada uma das faixas de gasto.
+Para gerar o *ranking* foram observadas as informações de variância (*sigma*) e média (*theta*) de cada *feature* por classe, conforme demonstram as tabelas abaixo:
 
 #### Top-20 palavras mais discriminantes para a Faixa 1 do serviço 17663:
 
@@ -305,7 +294,7 @@ Foi observado a informação da variância (*sigma*) e da média (*theta*)da fea
 | 29 | atualizacao | 0.003766 | 0.018478 |
 | 30 | projeto | 0.003713 | 0.022890 |
 
-É possível observar que na faixa 2 inclui assuntos como: ambiental, saúde, trânsito, informática, recursos humanos, segurança. Esses assuntos não constam na lista da Faixa 1. Isso pode sugerir que o compras com treinamento especializado em torno desses temas possam ser maiores ou mais numerosos no governo.
+É possível observar que a Faixa 2 inclui assuntos como: ambiental, saúde, trânsito, informática, recursos humanos, segurança. Esses assuntos não constam na lista da Faixa 1. Isso pode sugerir que compras de treinamentos especializados em torno desses temas possam ser maiores ou mais numerosas no governo.
 
 #### Top-20 palavras mais discriminantes para a Faixa 1 do serviço 3239:
 
@@ -377,15 +366,15 @@ Foi observado a informação da variância (*sigma*) e da média (*theta*)da fea
 | 29 | cargas | 0.007826 | 0.066090 |
 | 30 | taxi | 0.007693 | 0.026445 |
 
-Dentre os termos mais discrimantes da Faixa 1 do serviço 3239, de fato está a palavra **indígenas**, comprovando que é um assunto em destaque dessa categoria. Nessa faixa surgem também as palavras **médico**, **hospital**, sugerindo deslocamentos de pessoas para fins de cuidados com a saúde. Já na Faixa 2, esses termos não ocorrem, e dão lugar à termos como **aeroporto**, **taxi**, **pernoite**, **internacional**, sugerindo uma temática ligada ao traslado de pessoas que viajam muito de avião.
+Dentre os termos mais discrimantes da Faixa 1 do serviço 3239, de fato está a palavra **indígenas**, comprovando novamente o destaque desse assunto. Nessa faixa surgem também as palavras **médico**, **hospital**, sugerindo deslocamentos de pessoas para fins de cuidados com a saúde. Já na Faixa 2 tais termos não ocorrem e dão lugar a termos como **aeroporto**, **taxi**, **pernoite**, **internacional** sugerindo uma temática ligada ao traslado de pessoas que viajam de avião.
 
-### Detecção de Tóṕicos
+### Detecção de Tópicos
 
-Para confirmar algumas das suspeitas de temas em torno das compras, foi executado o algoritmo do LDA que observa a co-ocorrência de palavras nos documentos, gerando grupos de palavras que juntas representam tópicos que podem resumir os assuntos mais tratados em uma coleção de documentos. Para tanto foi utilizada a biblioteca **gensim**.
+Para entender os temas das compras de cada serviço e cada faixa, foi utilizada a técnica LDA. Essa técnica observa a co-ocorrência de palavras em documentos, gerando grupos de palavras que juntas representam tópicos que podem resumir os assuntos mais tratados naquele conjunto de textos. Para isso foi utilizada a biblioteca **gensim**.
 
-O modelo de LDA foi ajustado para encontrar 3 tópicos com 10 passadas pela coleção de documentos de cada faixa de cada serviço. É sabido que o LDA é uma abordagem supevisionada, e logo, não é possível saber de antemão a quantidade de tópicos e de palavras nos tópicos que melhor representará os assuntos em torno da coleção. Dessa forma, também foi utilizada a biblioteca **pyLDAvis** que gera visualizações navegáveis em HTML dos tópicos obtidos. (vide arquivos **lda.html** na pasta **out**)
+O modelo LDA foi ajustado para encontrar 3 tópicos através de 10 passadas pela coleção de documentos. É sabido que o LDA é uma abordagem supevisionada, e logo, não é possível saber de antemão a quantidade de tópicos e de palavras nos tópicos que melhor representará os assuntos em torno da coleção. Dessa forma, também foi utilizada a biblioteca **pyLDAvis** que gera visualizações navegáveis em HTML dos tópicos obtidos. (vide arquivos **lda.html** na pasta **out**)
 
-Para fins de insights, foram incluídos abaixo uma breve lista das palavras dos tópicos obtidos.
+Abaixo uma breve lista das palavras dos 3 tópicos obtidos para cada faixa de cada serviço:
 
 #### Tópicos identificados pelo LDA para a Faixa 1 do serviço 17663:
 
@@ -403,7 +392,7 @@ Para fins de insights, foram incluídos abaixo uma breve lista das palavras dos 
 
 * **Tópico 3**: 0.025*"curso" + 0.015*"educacao" + 0.014*"graduacao" + 0.013*"ambiental" + 0.013*"material" + 0.011*"capacitacao" + 0.010*"instituicao" + 0.010*"processo" + 0.009*"pos" + 0.009*"servidores"
 
-No geral os tópicos giram em torno da capactiação de servidores, mas na Faixa 2 é possível de fato observar temática **saúde** no 1º tópico, **gestores** no 2º e **ambiental** no 3º.
+No geral os tópicos giram em torno da capacitação de servidores, mas na Faixa 2 é possível de fato observar temática **saúde** no 1º tópico, **gestores** no 2º e **ambiental** no 3º.
 
 #### Tópicos identificados pelo LDA para a Faixa 1 do serviço 3239:
 
@@ -421,19 +410,20 @@ No geral os tópicos giram em torno da capactiação de servidores, mas na Faixa
 
 * **Tópico 3**: 0.047*"diaria" + 0.035*"tipo" + 0.024*"veiculos" + 0.023*"transporte" + 0.023*"meses" + 0.023*"inca" + 0.023*"horas" + 0.021*"feira" + 0.021*"unidades" + 0.019*"anexo"
 
-No caso do serivço 3239, é possível verificar na Faixa 1 de fato a ocorrência de tópicos que incluem as palavras **transporte** juntamente com **aldeia**, **índios** e **indígenas**, reforçando a importância do tema na coleção. Já na Faixa 2, esses assuntos não ocorrem.
+No caso do serivço 3239, é possível verificar na Faixa 1 de a ocorrência de tópicos que incluem as palavras **transporte** juntamente com **aldeia**, **índios** e **indígenas**, reforçando a importância do tema na coleção. Já na Faixa 2, esses assuntos não ocorrem.
 
 ### Deteção de compras suspeitas
 
-Com base nas análises anteriores, e assumindo ingenuamente que a análise dos textos das faixas de gasto de um serviço podem discriminar compras de alto valor de compras de baixo valor, sugere-se que um modelo de automático possa aprender a classificar uma compra quanto a sua faixa de gasto com base no seu texto, para em seguida classificar as compras coletadas e levantar suspeitas de comrpas que estão na Faixa 2 mas deveriam estar na Faixa 1.
+Com base nas análises anteriores, e assumindo ingenuamente que a análise dos textos das faixas de gasto podem discriminar compras de alto valor de compras de baixo valor, tentou-se criar uma estratégia automática de levantamento de compras suspeitas. A abordagem escolhida foi criar um classificador de faixa de gasto que aprende as características da Faixa 1 e da Faixa 2. Em seguida, esse mesmo classificador foi utilizada para classificar as compras coletadas. Compras que estão na Faixa 2 mas deveriam estar na Faixa 1 seriam consideradas suspeitas.
 
-Para tanto foi utilizado o classificador Random Forest com ajuda da classe **sklearn.ensemble.RandomForestClassifier**. Dado que temos 2000 features obtidas do vetorizador TF-IDF criado anteriormente, o classificador Random Forest foi testado e ajustado até apresentar uma alta acurácia, mas ainda sim gerando alguns falsos positivos para a Faixa 1, que serão tratados como suspeitos. A configuração configuração sugerido foi trabalhar com 5 árvores estimadoras e profundidade máxima 10 em cada árvore.
+Para tanto foi utilizado o classificador *Random Forest* com ajuda da classe **sklearn.ensemble.RandomForestClassifier**. Dado que temos 2000 features obtidas com o vetorizador TF-IDF criado anteriormente, o classificador *Random Forest* foi testado e ajustado até apresentar uma alta acurácia, próximo de um *overfitting*, mas ainda sim gerando alguns casos de falsos positivos para a Faixa 1, que seriam tratados como casos suspeitos. A acurácia foi verificada com validação cruzada de 5 *folds*. A configuração sugerida após a exploração da técnica foi trabalhar com 5 árvores estimadoras e profundidade máxima 10 em cada árvore. Esse ajuste deveria ser revisto para cada serviço, pois não há uma regra única que atenda toda e qualquer base de documentos.
 
-A acurácia foi verificada com validação cruzada de 5 *folds*, e em seguida toda a coleção foi classificada automaticamente. Os suspeitos foram listados em um arquivo separado, ordenados do maior valor de compra para o menor, além de oferecer o link para o detalhe da compra/licitação no site do governo. (vide o arquivo **suspeitas.txt** no diretório **out**)
+Os suspeitos foram listados em um arquivo separado, ordenados do maior para o menor valor de compra, gerando na saída também o link direto para os detalhes da compra/licitação no site do governo. (vide o arquivo **suspeitas.txt** no diretório **out**). Abaixo seguem alguma amostras de saídas do sistema:
 
 #### Resultado da identificação de compras suspeitas para o serviço 17663 (Cursos de Especialização):
 
 Classes:
+
  * Faixa 1 (gasto até 437236.17) - 2716 registros.
  * Faixa 2 (acima de 437236.17) - 49 registros.
 
@@ -445,11 +435,12 @@ Foram encontrada 41 suspeitas. Algumas delas:
 * A compra #2237 de valor 3359457.66 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/15308006000101999)
 * A compra #2621 de valor 3054234.70 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/compraSemLicitacao/doc/compra_slicitacao/25000506001022002)
 
-A primeira suspeita acima, da compra #78, foi avaliada no site do governo e apresentou dados de fato confusos. Sua descrição indica *"prestação de serviços de limpeza e conservação prediais"*. Já sua justificativa alega "entidade Jurídica de direito privado, sem fins lucrativos, especializada para desenvolvimento dos cursos de qualificação". Ademais, a descrição do único item que compõe a compra é: "realização de 50 cursos, atendendo 11 Estados da Federação, para qualificação de 2.000 (dois mil) Agentes Municipais de Trânsito, sendo 50 (cinquenta) turmas de 40 (quarenta) alunos cada." É importante destacar que pode também se tratar de um erro na base de dados.
+A primeira suspeita acima, da compra #78, foi investigada no site do governo e apresentou dados de fato confusos. Sua descrição indica *"prestação de serviços de limpeza e conservação prediais"*. Já sua justificativa alega "entidade Jurídica de direito privado, sem fins lucrativos, especializada para desenvolvimento dos cursos de qualificação". Ademais, a descrição do único item que compõe a compra é: "realização de 50 cursos, atendendo 11 Estados da Federação, para qualificação de 2.000 (dois mil) Agentes Municipais de Trânsito, sendo 50 (cinquenta) turmas de 40 (quarenta) alunos cada." É importante destacar que pode também se tratar de um erro na base de dados.
 
 #### Resultado da identificação de compras suspeitas para o serviço 3239 (Transporte Rodoviário de Pessoas):
 
 Classes: 
+
  * Faixa 1 (gasto até 1822154.05) - 999 registros.
  * Faixa 2 (acima de 1822154.05) - 12 registros.
 
@@ -460,14 +451,12 @@ Foram encontrada 2 suspeitas, conforme segue:
 * A licitacao #1063 de valor 43048801.96 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/25005203000892000)
 * A licitacao #1725 de valor 3260659.88 é da Faixa 2 mas parece ser da Faixa 1. (http://compras.dados.gov.br/licitacoes/doc/licitacao/25001502000012002)
 
-A primeira suspeita acima, da licitação #1063, foi avaliada no site do governo. É uma compra do Instituto Nacional do Câncer (INCA). Sua descrição é *"Serviços de locação de diversos tipos de veículos, ambulâncias e caminhões, para atenderem às necessidades das diversas Unidades do INCA, conforme especificações constantes do edital."* Os item de compra dela são milhares de diárias de ambulâncias para transporte de pacientes. Um fato que pode ser observado nesse caso, é que outras variáveis devem ser levadas em conta pelo classificador de suspeitas além da informação textual. Uma delas é a quantidade e a unidade do item de compra, pois ela pode revelar dimensões importantes sobre a compra que está sendo feita, ajudando o classificador por exemplo a diferenciar uma compra cara e numerosa e uma compra barata de poucas unidades de um mesmo tipo de material/serviço.
+A primeira suspeita acima, da licitação #1063, foi investgiada. É uma compra do Instituto Nacional do Câncer (INCA). Sua descrição é *"Serviços de locação de diversos tipos de veículos, ambulâncias e caminhões, para atenderem às necessidades das diversas Unidades do INCA, conforme especificações constantes do edital."* Os item de compra dela são milhares de diárias de ambulâncias para transporte de pacientes, oque de fato parece ser algo que justique o valor elevado. Com isso observou-se que outras variáveis deveriam ser levadas em conta pelo classificador de suspeitas além da informação textual. A quantidade e a unidade do item de compra por exemplo, pode revelar dimensões importantes sobre a compra que está sendo feita, ajudando o classificador a diferenciar uma compra cara e numerosa e uma compra barata mais porém de poucas unidades de um mesmo serviço.
 
 ## Considerações Finais
 
-Foi apresentado um sistema automatizado de coleta, extração, processamento e análise do texto das compras governamentais, sob a das faixas de menor e maior gastos de um determinado serviço. A execução do fluxo para dois serviços específicos foi realizada e os resultados foram apresentados para ilustrar o potencial analítico do ferramental proposto. Foi possível exercitar diversos assuntos pertinentes aos tema recuperação da informação e mineração de textos. 
+Foi apresentado um sistema automatizado de coleta, extração, processamento e análise do texto das compras governamentais. As compras foram analisadas sob a ótica das faixas de menor e maior gastos. A execução do fluxo proposto para dois serviços específicos foi realizada. Os resultados foram apresentados para ilustrar o potencial analítico do ferramental proposto. Foi possível exercitar diversos assuntos pertinentes aos tema recuperação da informação e mineração de textos. 
 
-O sistema demonstra alto grau de automatização, bastanto definir qual serviço será avaliado no arquivo **constantes.py**, e executando as etapas do fluxo através do arquivo **main.py**. As respostas da coleta são armazenadas no diretório **cache**, os dados intermediários do fluxo são armazenados no diretório **data**, separados por serviço. Os documentos e figuras frutos da análise são armazenados no diretório **out** separados por serviço.
-
-O trabalho pode ser expandido tanto com a coleta de dados de novos serviços, quanto com o aprimoramento do sistema. Algumas melhorias futuras incluem: fazer a coleta de materiais (hoje só coleta serviços), incluir novas dimensões na análise além do texto (ex: levar em conta a data, o local, dados do órgão que originou a compra, dados do fornecedor que ofereceu o serviço/material, etc.), além de ajustes finos nas estratégias definidas.
+O trabalho pode ser expandido tanto com a coleta de dados de novos serviços, quanto com o aprimoramento do sistema. Algumas melhorias futuras incluem: fazer a coleta de materiais (hoje só coleta serviços), incluir novas dimensões na análise além das palavras do texto (ex: levar em conta a data e o local da compra, os dados do órgão que originou a compra, dados do fornecedor que ofereceu o serviço/material, etc.), além de ajustes finos nas estratégias definidas.
 
 _**Fim**_
