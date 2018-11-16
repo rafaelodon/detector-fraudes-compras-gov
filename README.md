@@ -156,7 +156,7 @@ Outra parte do processamento, não relacionada ao texto, foi o atualização mon
 
 Uma análise estatística descritiva foi feito sobre os valores das compras de ambos os serviços. Em ambos os casos, verificou-se que, conforme é possível ver nas tabelas e nos gráficos, os valores de compras mais altos só ocorrem próximos do percentil 98, 99. Ou seja, a maior parte das compras tem valores moderados se comparadas com os valores máximos.
 
-**Tabela 1**: estatística descritiva do serviço 17663 (Cursos)
+#### Tabela 1: estatística descritiva do serviço 17663 (Cursos)
 
 | descritiva | valor |
 | --- | --- |
@@ -176,11 +176,11 @@ Uma análise estatística descritiva foi feito sobre os valores das compras de a
 | 99% | 830910 |
 | max | 15324904 |
 
-**Figura 1** - Histograma dos valores do Serviço 17663 (Cursos)
+#### Figura 1 - Histograma dos valores do Serviço 17663 (Cursos)
 ![](out/17663/histograma_valores.png?raw=true)
 
 
-**Tabela 1**: estatística descritiva do serviço 3239 (Transporte)
+#### Tabela 1: estatística descritiva do serviço 3239 (Transporte)
 | descritiva | valor |
 | --- | --- |
 | count | 1011 |
@@ -199,7 +199,7 @@ Uma análise estatística descritiva foi feito sobre os valores das compras de a
 | 99% | 2188247 |
 | max | 43048801 |
 
-**Figura 1** - Histograma dos valores do Serviço 17663 (Cursos)
+#### Figura 1 - Histograma dos valores do Serviço 17663 (Cursos)
 ![](out/3239/histograma_valores.png?raw=true)
 
 Para definir o ponto de corte da faixa de menor gasto para para a faixa de maior gasto, foram feitas algumas tentativas. Por fim, optou-se por uma regra que demonstrou chegar num valor adequado para ambos os serviços. O **valor de corte** foi definido como sendo a **média** somada com **1 desvio**.
@@ -208,44 +208,187 @@ Com essa abordagem, o ponto de corte do seviço 17663 foi o percentil 98.227848,
 
 ### Frequência de termos
 
-O **Analisador** utiliza os valores TF-IDF advindos do processamento para gerar nuvens de palavras em que os termos com valores de frequências mais altas ficam em destaque. As nuvens foram construídas através do objeto **wordcloud.WordCloud**
+O **Analisador** utiliza os valores TF-IDF advindos do processamento para gerar nuvens de palavras em que os termos com valores de frequências mais altas ficam em destaque. As nuvens foram construídas através do objeto **wordcloud.WordCloud** e foram criadas nuvens separadas para cada faixa de gasto, sendo que a **Faixa 1** é a faixa de menor gasto, e a **Faixa 2** é a faixa de maior gasto.
 
-Pororó x y.
+Também foram gerados na saída, arquivos contendo a lista de palavras mais frequentes, já que a nuvem, apesasr de visualmente atraente, não é muito boa para uma análise cautelosa comparativa entre os conjuntos de termos. (vide arquivos **termos_Faixa1.md** e **termos_Faixa2.md** nas pasta **out** )
+
+#### Nuvens de palavras do serviço 17663 (Cursos de Especialização)
+
 ![](out/17663/tagcloud_Faixa1.png?raw=true)
 
 ![](out/17663/tagcloud_Faixa2.png?raw=true)
 
-### Termos Discriminantes (Naive Bayes)
-Pororó x y.
+É possível observar nas nuvens do serviço 17663 que grande parte das compras se relacionam de fato com investimento em aperfeiçoamento de servidores, sendo eles através de cursos, treinamentos, especializaçõões, materiais educativos, congressos. Destaca-se na nuvem da Faixa 2 o termo **saúde** que sugere que podem existir gastos mais elevados nessa área de formação.
 
-### Modelagem de Tóṕicos (LDA)
+#### Nuvens de palavras do serviço 3239 (Transporte Rodoviário de Pessoas)
 
-Tópicos encontrados pelo LDA - 5 tópicos, 20 passadas, 4 palavras:
+![](out/3239/tagcloud_Faixa1.png?raw=true)
 
-1. 0.041*"aplicacao" + 0.040*"prepom" + 0.040*"aquaviarios" + 0.039*"previstos"
+![](out/3239/tagcloud_Faixa2.png?raw=true)
 
-2. 0.016*"curso" + 0.015*"gestao" + 0.015*"treinamento" + 0.013*"cur"
+As nuvens de palavras do serviço 3239 sugerem compras em torno de serviços de transporte, frete, contratação de motorista, aluguel de veículos. Mas chama a atenção na Faixa 1, de menor gasto, as palavras índios, indigena e aldeia, revelando um tipo de gasto governamental de pouca visibilidade.
 
-3. 0.015*"curso" + 0.014*"servidores" + 0.007*"periodo" + 0.007*"material"
+### Anális de Termos Discriminantes
 
-4. 0.022*"conforme" + 0.019*"quantidades" + 0.018*"exigencias" + 0.018*"militares"
+Afim de comprovar de fato os termos que discriminam uma faixa de gasto da outra, surgiu a idéia de ajustar um classificador *Naive Bayes* para que as informações do cálculo das probabilidades de cada classe pudesse ser usado como um ranking das palavras mais importantes. Dessa forma, foi utilizado o **sklearn.naive_bayes.GaussianNB**, primeiramente fazendo um treino com validação cruzada de 5 *folds* para medir sua acurácia, e em seguida ajustando-se com toda a base para gerar a informação probabilística.
 
-5. 0.039*"arte" + 0.038*"acordo" + 0.034*"ensino" + 0.021*"cacoal"
+Foi observado a informação da variância (*sigma*) e da média (*theta*)da feature por classe para rankear as top-palavras de cada uma das faixas de gasto.
 
-## Identificação de Padrões
+#### Top-20 palavras mais discriminantes para a Faixa 1 do serviço 17663:
 
-Fazer uma análise da ocorrência dos padrões abaixo.
+| ranking | palavra | sigma | theta |
+| --- | --- | --- | --- |
+| 1 | servidores | 0.020315 | 0.128345 |
+| 2 | participacao | 0.015974 | 0.048399 |
+| 3 | referente | 0.015537 | 0.045957 |
+| 4 | periodo | 0.012891 | 0.065668 |
+| 5 | brasilia | 0.012198 | 0.040523 |
+| 6 | maria | 0.010902 | 0.029835 |
+| 7 | realizado | 0.010624 | 0.046874 |
+| 8 | lei | 0.010547 | 0.033297 |
+| 9 | material | 0.009802 | 0.052602 |
+| 10 | aperfeicoamento | 0.009550 | 0.027284 |
+| 11 | registro | 0.008832 | 0.033202 |
+| 12 | manutencao | 0.008363 | 0.029003 |
+| 13 | horas | 0.008012 | 0.020143 |
+| 14 | empresa | 0.007952 | 0.028426 |
+| 15 | participar | 0.007557 | 0.026616 |
+| 16 | atender | 0.007556 | 0.041355 |
+| 17 | consumo | 0.007145 | 0.021562 |
+| 18 | paulo | 0.007127 | 0.020399 |
+| 19 | equipamentos | 0.006857 | 0.026778 |
+| 20 | estabelecido | 0.006670 | 0.026210 |
+| 21 | deste | 0.006634 | 0.025207 |
+| 22 | nacional | 0.006415 | 0.020672 |
+| 23 | direta | 0.006321 | 0.015083 |
+| 24 | curso | 0.006310 | 0.080502 |
+| 25 | mat | 0.006262 | 0.012909 |
+| 26 | sao | 0.005792 | 0.018641 |
+| 27 | conforme | 0.005789 | 0.030746 |
+| 28 | ser | 0.005766 | 0.029811 |
+| 29 | administracao | 0.005748 | 0.018331 |
+| 30 | publica | 0.005708 | 0.024211 |
 
-curso de *
-especialização em *
-mestrado em *
-doutorado em *
-graduação em *
+#### Top-20 palavras mais discriminantes para a Faixa 2 do serviço 17663:
 
-## Termos que mais agregam preço às licitações/compras
 
-## Série temporal de algum termo específico
+| ranking | palavra | sigma | theta |
+| --- | --- | --- | --- |
+| 1 | treinamento | 0.010706 | 0.039954 |
+| 2 | ambiental | 0.009945 | 0.024885 |
+| 3 | graduacao | 0.009906 | 0.038901 |
+| 4 | saude | 0.009798 | 0.052138 |
+| 5 | pos | 0.008984 | 0.032768 |
+| 6 | transito | 0.007490 | 0.020014 |
+| 7 | componentes | 0.007230 | 0.017397 |
+| 8 | educacao | 0.006404 | 0.025989 |
+| 9 | horas | 0.006333 | 0.021662 |
+| 10 | atender | 0.005431 | 0.037598 |
+| 11 | producao | 0.005213 | 0.014358 |
+| 12 | ufpe | 0.005105 | 0.010312 |
+| 13 | servidores | 0.005038 | 0.034969 |
+| 14 | naval | 0.004922 | 0.010127 |
+| 15 | informatica | 0.004836 | 0.018229 |
+| 16 | instituicao | 0.004813 | 0.037921 |
+| 17 | capacitacao | 0.004749 | 0.038096 |
+| 18 | humanos | 0.004725 | 0.016365 |
+| 19 | recursos | 0.004528 | 0.018485 |
+| 20 | especializacao | 0.004423 | 0.041247 |
+| 21 | contratos | 0.004229 | 0.023515 |
+| 22 | resfriamento | 0.004215 | 0.009370 |
+| 23 | profissional | 0.004155 | 0.029968 |
+| 24 | turma | 0.004105 | 0.012278 |
+| 25 | seguranca | 0.003964 | 0.009087 |
+| 26 | ensino | 0.003936 | 0.023565 |
+| 27 | tecnica | 0.003848 | 0.024772 |
+| 28 | interna | 0.003832 | 0.013105 |
+| 29 | atualizacao | 0.003766 | 0.018478 |
+| 30 | projeto | 0.003713 | 0.022890 |
 
-## Anotações:
+É possível observar que na faixa 2 inclui assuntos como: ambiental, saúde, trânsito, informática, recursos humanos, segurança. Esses assuntos não constam na lista da Faixa 1. Isso pode sugerir que o compras com treinamento especializado em torno desses temas possam ser maiores ou mais numerosos no governo.
 
-https://www.kaggle.com/ykhorramz/lda-and-t-sne-interactive-visualization
+#### Top-20 palavras mais discriminantes para a Faixa 1 do serviço 3239:
+
+| ranking | palavra | sigma | theta |
+| --- | --- | --- | --- |
+| 1 | materiais | 0.050605 | 0.106390 |
+| 2 | indigenas | 0.045294 | 0.087304 |
+| 3 | servicos | 0.029950 | 0.061576 |
+| 4 | rodado | 0.025620 | 0.042201 |
+| 5 | equipamentos | 0.025571 | 0.055718 |
+| 6 | ate | 0.024179 | 0.047951 |
+| 7 | veiculos | 0.023904 | 0.053977 |
+| 8 | conforme | 0.020759 | 0.066162 |
+| 9 | anexo | 0.019888 | 0.062316 |
+| 10 | especializada | 0.015370 | 0.043200 |
+| 11 | necessidades | 0.014916 | 0.040655 |
+| 12 | atender | 0.013932 | 0.050508 |
+| 13 | pessoal | 0.012821 | 0.024324 |
+| 14 | locacao | 0.012735 | 0.030054 |
+| 15 | manutencao | 0.012541 | 0.032847 |
+| 16 | onibus | 0.012337 | 0.024075 |
+| 17 | sendo | 0.011998 | 0.028858 |
+| 18 | local | 0.011329 | 0.024251 |
+| 19 | prestadora | 0.010821 | 0.023853 |
+| 20 | medico | 0.010401 | 0.018035 |
+| 21 | centro | 0.009670 | 0.022158 |
+| 22 | hospital | 0.009652 | 0.018050 |
+| 23 | sistema | 0.009576 | 0.021816 |
+| 24 | tecnicas | 0.009062 | 0.021343 |
+| 25 | rodoviario | 0.008991 | 0.017003 |
+| 26 | pessoas | 0.008973 | 0.023904 |
+| 27 | referencia | 0.008864 | 0.027221 |
+| 28 | federal | 0.008656 | 0.021758 |
+| 29 | diversos | 0.008299 | 0.018132 |
+| 30 | termo | 0.008096 | 0.027533 |
+
+#### Top-20 palavras mais discriminantes para a Faixa 2 do serviço 3239:
+
+| ranking | palavra | sigma | theta |
+| --- | --- | --- | --- |
+| 1 | diaria | 0.033232 | 0.080719 |
+| 2 | horas | 0.028042 | 0.074800 |
+| 3 | nuraf | 0.022485 | 0.045212 |
+| 4 | meses | 0.018017 | 0.068731 |
+| 5 | rodado | 0.017411 | 0.039785 |
+| 6 | media | 0.017411 | 0.039785 |
+| 7 | categoria | 0.017411 | 0.039785 |
+| 8 | ano | 0.017411 | 0.039785 |
+| 9 | pequenas | 0.015892 | 0.081587 |
+| 10 | perimetro | 0.015620 | 0.037683 |
+| 11 | irrigados | 0.015620 | 0.037683 |
+| 12 | pecas | 0.014804 | 0.060123 |
+| 13 | manutencao | 0.014797 | 0.060058 |
+| 14 | locacao | 0.014189 | 0.070948 |
+| 15 | salgado | 0.013555 | 0.035103 |
+| 16 | internacional | 0.013555 | 0.035103 |
+| 17 | filho | 0.013555 | 0.035103 |
+| 18 | alegre | 0.013555 | 0.035103 |
+| 19 | aeroporto | 0.013555 | 0.035103 |
+| 20 | motorista | 0.012552 | 0.093567 |
+| 21 | tipo | 0.012027 | 0.062625 |
+| 22 | ser | 0.011199 | 0.047283 |
+| 23 | ate | 0.009923 | 0.056612 |
+| 24 | firma | 0.009004 | 0.028611 |
+| 25 | veiculos | 0.008929 | 0.115578 |
+| 26 | ans | 0.008734 | 0.034988 |
+| 27 | pernoite | 0.008520 | 0.031458 |
+| 28 | passageiros | 0.007946 | 0.041299 |
+| 29 | cargas | 0.007826 | 0.066090 |
+| 30 | taxi | 0.007693 | 0.026445 |
+
+Dentre os termos mais discrimantes da Faixa 1 do serviço 3239, de fato está a palavra **indígenas**, comprovando que é um assunto em destaque dessa categoria. Nessa faixa surgem também as palavras **médico**, **hospital**, sugerindo deslocamentos de pessoas para fins de cuidados com a saúde. Já na Faixa 2, esses termos não ocorrem, e dão lugar à termos como **aeroporto**, **taxi**, **pernoite**, **internacional**, sugerindo uma temática ligada ao traslado de pessoas que viajam muito de avião.
+
+### Detecção de Tóṕicos
+
+Para confirmar algumas das suspeitas de temas em torno das compras, foi executado o algoritmo do LDA que observa a co-ocorrência de palavras nos documentos, gerando grupos de palavras que juntas representam tópicos que podem resumir os assuntos mais tratados em uma coleção de documentos. Para tanto foi utilizada a biblioteca **gensim**.
+
+O modelo de LDA foi ajustado para encontrar 3 tópicos com 3 passadas pela coleção de documentos de cada faixa de cada serviço.
+
+### Tópicos identificados pelo LDA para a Faixa 1 do serviço 17663:
+
+* **Tópico 1**: 0.027*"curso" + 0.019*"servidores" + 0.013*"com" + 0.009*"dos" + 0.008*"periodo" + 0.008*"ser" + 0.007*"realizado" + 0.006*"atender" + 0.006*"equipamentos" + 0.005*"conforme"
+
+* **Tópico 2**: 0.022*"curso" + 0.014*"com" + 0.013*"servidores" + 0.011*"atender" + 0.010*"conforme" + 0.010*"anexo" + 0.008*"material" + 0.006*"especializada" + 0.006*"por" + 0.006*"dos"
+
+* **Tópico 3**: 0.028*"servidores" + 0.024*"curso" + 0.014*"periodo" + 0.011*"material" + 0.009*"com" + 0.008*"dos" + 0.008*"abaixo" + 0.008*"brasilia" + 0.008*"participacao" + 0.007*"realizado"
