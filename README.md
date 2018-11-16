@@ -9,7 +9,7 @@
 ## Introdução
 
 O presente trabalho busca exercitar técnicas de recuperação de informação e de mineração de texto através do desenvolvimento de um sistema que coleta, extrai, processa e analisa sob determinadas óticas o conteúdo textual descritivo de uma amostra das compras do Governo Federal.
-Os dados observados encontram-se disponíveis publicamente no site http://compras.dados.gov.br.
+Os dados observados encontram-se disponíveis publicamente no site de [http://compras.dados.gov.br](http://compras.dados.gov.br).
 
 As compras feitas pelo governo podem ser do tipo **com licitação** ou **sem licitação**, e são categorizadas com ajuda de um catálogo de **serviços** e **materiais** que agrupa compras de segmentos semelhantes. No enatnto, o volume de informações e a complexidade da base torna difícil contemplar as características gerais do comportamento de compra por parte das entidades públicas.
 
@@ -383,7 +383,7 @@ Dentre os termos mais discrimantes da Faixa 1 do serviço 3239, de fato está a 
 
 Para confirmar algumas das suspeitas de temas em torno das compras, foi executado o algoritmo do LDA que observa a co-ocorrência de palavras nos documentos, gerando grupos de palavras que juntas representam tópicos que podem resumir os assuntos mais tratados em uma coleção de documentos. Para tanto foi utilizada a biblioteca **gensim**.
 
-O modelo de LDA foi ajustado para encontrar 3 tópicos com 10 passadas pela coleção de documentos de cada faixa de cada serviço. É sabido que o LDA é uma abordagem supevisionada, e logo, não é possível saber de antemão a quantidade de tópicos e de palavras nos tópicos que melhor representará os assuntos em torno da coleção. Dessa forma, também foi utilizada a biblioteca **pyLDAvis** que gera visualizações navegáveis em HTML dos tópicos obtidos. (vide arquivos **lda*.html** na pasta **out**)
+O modelo de LDA foi ajustado para encontrar 3 tópicos com 10 passadas pela coleção de documentos de cada faixa de cada serviço. É sabido que o LDA é uma abordagem supevisionada, e logo, não é possível saber de antemão a quantidade de tópicos e de palavras nos tópicos que melhor representará os assuntos em torno da coleção. Dessa forma, também foi utilizada a biblioteca **pyLDAvis** que gera visualizações navegáveis em HTML dos tópicos obtidos. (vide arquivos **lda.html** na pasta **out**)
 
 Para fins de insights, foram incluídos abaixo uma breve lista das palavras dos tópicos obtidos.
 
@@ -407,19 +407,21 @@ No geral os tópicos giram em torno da capactiação de servidores, mas na Faixa
 
 #### Tópicos identificados pelo LDA para a Faixa 1 do serviço 3239:
 
-* **Tópico 1**: 
+* **Tópico 1**: 0.030*"frete" + 0.028*"aldeia" + 0.023*"memo" + 0.021*"transporte" + 0.016*"barra" + 0.014*"percurso" + 0.013*"indios" + 0.012*"aerbgs" + 0.012*"ate" + 0.012*"sao"
 
-* **Tópico 2**: 
+* **Tópico 2**: 0.017*"transporte" + 0.013*"frete" + 0.009*"atender" + 0.009*"memo" + 0.008*"onibus" + 0.008*"conforme" + 0.007*"anexo" + 0.006*"materiais" + 0.006*"caramuru" + 0.005*"veiculos"
 
-* **Tópico 3**: 
+* **Tópico 3**: 0.036*"transporte" + 0.013*"veiculos" + 0.012*"frete" + 0.012*"indigenas" + 0.009*"atender" + 0.009*"materiais" + 0.006*"pessoas" + 0.006*"conforme" + 0.006*"aldeia" + 0.006*"especializada"
 
 #### Tópicos identificados pelo LDA para a Faixa 2 do serviço 3239:
 
-* **Tópico 1**: 
+* **Tópico 1**: 0.060*"veiculos" + 0.046*"motorista" + 0.046*"locacao" + 0.046*"pecas" + 0.046*"manutencao" + 0.039*"nuraf" + 0.019*"atender" + 0.018*"ans" + 0.018*"categoria" + 0.018*"media"
 
-* **Tópico 2**: 
+* **Tópico 2**: 0.040*"transporte" + 0.036*"pequenas" + 0.029*"veiculos" + 0.026*"cargas" + 0.022*"pessoas" + 0.022*"porto" + 0.022*"ate" + 0.022*"motorista" + 0.019*"meses" + 0.019*"especializada"
 
-* **Tópico 3**: 
+* **Tópico 3**: 0.047*"diaria" + 0.035*"tipo" + 0.024*"veiculos" + 0.023*"transporte" + 0.023*"meses" + 0.023*"inca" + 0.023*"horas" + 0.021*"feira" + 0.021*"unidades" + 0.019*"anexo"
+
+No caso do serivço 3239, é possível verificar na Faixa 1 de fato a ocorrência de tópicos que incluem as palavras **transporte** juntamente com **aldeia**, **índios** e **indígenas**, reforçando a importância do tema na coleção. Já na Faixa 2, esses assuntos não ocorrem.
 
 ### Deteção de compras suspeitas
 
@@ -460,13 +462,12 @@ Foram encontrada 2 suspeitas, conforme segue:
 
 A primeira suspeita acima, da licitação #1063, foi avaliada no site do governo. É uma compra do Instituto Nacional do Câncer (INCA). Sua descrição é *"Serviços de locação de diversos tipos de veículos, ambulâncias e caminhões, para atenderem às necessidades das diversas Unidades do INCA, conforme especificações constantes do edital."* Os item de compra dela são milhares de diárias de ambulâncias para transporte de pacientes. Um fato que pode ser observado nesse caso, é que outras variáveis devem ser levadas em conta pelo classificador de suspeitas além da informação textual. Uma delas é a quantidade e a unidade do item de compra, pois ela pode revelar dimensões importantes sobre a compra que está sendo feita, ajudando o classificador por exemplo a diferenciar uma compra cara e numerosa e uma compra barata de poucas unidades de um mesmo tipo de material/serviço.
 
-## Conclusão
+## Considerações Finais
 
-Foi apresentado um sistema automatizado de coleta, extração, processamento e análise do texto das compras governamentais, sob a das faixas de menor e maior gastos de um determinado serviço. A execução do fluxo para dois serviços específicos foi realizada, e os resultados foram apresentados para ilustrar o potencial analítico do ferramental proposto. Foi possível exercitar diversos assuntos pertinentes aos tema recuperação da informação e mineração de textos. 
+Foi apresentado um sistema automatizado de coleta, extração, processamento e análise do texto das compras governamentais, sob a das faixas de menor e maior gastos de um determinado serviço. A execução do fluxo para dois serviços específicos foi realizada e os resultados foram apresentados para ilustrar o potencial analítico do ferramental proposto. Foi possível exercitar diversos assuntos pertinentes aos tema recuperação da informação e mineração de textos. 
 
-O sistema demonstra alto grau de automatização, bastanto definir qual serviço será analisado para que o fluxo de trabalho seja executado, gerando documentos e figuras frutos da análise num diretório de saída.
+O sistema demonstra alto grau de automatização, bastanto definir qual serviço será avaliado no arquivo **constantes.py**, e executando as etapas do fluxo através do arquivo **main.py**. As respostas da coleta são armazenadas no diretório **cache**, os dados intermediários do fluxo são armazenados no diretório **data**, separados por serviço. Os documentos e figuras frutos da análise são armazenados no diretório **out** separados por serviço.
 
 O trabalho pode ser expandido tanto com a coleta de dados de novos serviços, quanto com o aprimoramento do sistema. Algumas melhorias futuras incluem: fazer a coleta de materiais (hoje só coleta serviços), incluir novas dimensões na análise além do texto (ex: levar em conta a data, o local, dados do órgão que originou a compra, dados do fornecedor que ofereceu o serviço/material, etc.), além de ajustes finos nas estratégias definidas.
 
 _**Fim**_
-

@@ -34,11 +34,11 @@ def main():
     #processador.atualizar_valores_com_selic()    
 
     analisador = Analisador()      
-    #analisador.analisar_valores()
-    #analisador.gerar_tagclouds()    
-    #analisador.avaliar_features_naive_bayes()    
+    analisador.analisar_valores()
+    analisador.gerar_tagclouds()    
+    analisador.avaliar_features_naive_bayes()    
     analisador.analisar_topicos()    
-    #analisador.identificar_compras_suspeitas()    
+    analisador.identificar_compras_suspeitas()    
     
 if __name__ == "__main__":    
     main()

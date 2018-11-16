@@ -10,6 +10,9 @@ from nltk.tokenize import word_tokenize
 import pickle
 
 class PortugueseTagger:    
+    '''
+        Esse portuguese tagger foi construído e usado na etapa inicial do trabalho, mas acabou ficando sem uso no projeto final.
+    '''
 
     def __init__(self):
         self.tagger = None            
