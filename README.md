@@ -193,7 +193,7 @@ Uma análise estatística descritiva foi feito sobre os valores das compras de a
 #### Figura 1 - Histograma dos valores do Serviço 17663 (Cursos)
 ![](out/3239/histograma_valores.png?raw=true)
 
-Para definir um ponto de corte da **faixa de menor gasto** para para a **faixa de maior gasto**, foram feitas algumas tentativas durante uma etapa exploratória. Por fim, chegou-se a uma regra que demonstrou calcular num valor adequado de corte para ambos os serviços. O **valor de corte** ficou sendo a **média** somada com **1 desvio**.
+Para definir um ponto de corte da **faixa de menor gasto** para a **faixa de maior gasto**, foram feitas algumas tentativas durante uma etapa exploratória. Por fim, chegou-se a uma regra que demonstrou calcular num valor adequado de corte para ambos os serviços. O **valor de corte** ficou sendo a **média** somada com **1 desvio**.
 
 Com essa abordagem, o ponto de corte do seviço 17663 foi o percentil 98.227848, e o do serviço 3239 foi o percentil 98.813056.
 
