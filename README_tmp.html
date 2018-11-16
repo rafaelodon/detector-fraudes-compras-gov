@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>README.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+	font-size: 14px;
+	padding: 0 12px;
+	line-height: 22px;
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	color: #4080D0;
+	text-decoration: none;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+	font-size: inherit;
+	line-height: auto;
+}
+
+a:hover {
+	color: #4080D0;
+	text-decoration: underline;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left: 5px solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+.mac code {
+	font-size: 12px;
+	line-height: 18px;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+/** Theming */
+
+.vscode-light,
+.vscode-light pre code {
+	color: rgb(30, 30, 30);
+}
+
+.vscode-dark,
+.vscode-dark pre code {
+	color: #DDD;
+}
+
+.vscode-high-contrast,
+.vscode-high-contrast pre code {
+	color: white;
+}
+
+.vscode-light code {
+	color: #A31515;
+}
+
+.vscode-dark code {
+	color: #D7BA7D;
+}
+
+.vscode-light pre:not(.hljs),
+.vscode-light code > div {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre:not(.hljs),
+.vscode-dark code > div {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre:not(.hljs),
+.vscode-high-contrast code > div {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vscode-light blockquote,
+.vscode-dark blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.vscode-high-contrast blockquote {
+	background: transparent;
+	border-color: #fff;
+}
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family:  "Meiryo", "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+</head>
+<body>
+<h1 id="recupera%C3%A7%C3%A3o-e-minera%C3%A7%C3%A3o-de-texto-sobre-as-compras-governamentais">Recuperação e Mineração de Texto sobre as Compras Governamentais</h1>
+<p><strong>Autor</strong>: Rafael Odon de Alencar</p>
+<p><strong>Email</strong>: odon.rafael@gmail.com</p>
+<p><strong>Data</strong>: 15/11/2018</p>
+<h2 id="introdu%C3%A7%C3%A3o">Introdução</h2>
+<p>O presente trabalho busca exercitar técnicas de recuperação de informação e de mineração de texto através do desenvolvimento de um sistema que coleta, extrai, processa e analisa sob determinadas óticas o conteúdo textual descritivo de uma amostra das compras do Governo Federal.
+Os dados observados encontram-se disponíveis publicamente no site http://compras.dados.gov.br.</p>
+<p>As compras feitas pelo governo podem ser do tipo <strong>com licitação</strong> ou <strong>sem licitação</strong>, e são categorizadas com ajuda de um catálogo de <strong>serviços</strong> e <strong>materiais</strong> que agrupa compras de segmentos semelhantes. No enatnto, o volume de informações e a complexidade da base torna difícil contemplar as características gerais do comportamento de compra por parte das entidades públicas.</p>
+<p>Afim de demonstrar o potencial de uma ferramenta automatizada para auxiliar na recuperação e análise em torno do texto dessas compras, foram selecionados apenas 2 serviços específicos do catálogo:</p>
+<ul>
+<li>Serviço 17663: Curso Aperfeiçoamento / Especialização Profissional</li>
+<li>Serviço 3239: Transporte Rodoviário - Pessoal por Automóveis</li>
+</ul>
+<p>Em resumo, foram coletadas todas compras com e sem licitação desses dois serviços, e o conteúdo textual descritivo desses documentos foi extraído, processado e utilizado para gerar <em>insights</em>. As compras foram classificadas quanto à faixa de gasto a partir de uma análise da estatística descritiva. Em seguida, foram geradas nuvens de palavras destacando os termos descritivos de maior frequência para o <strong>grupo de gastos menores</strong> e para o <strong>grupo de gastos maiores</strong>. Um modelo de classificação <em>Naive Bayes</em> foi utilizado para verificar os termos que mais contribuiram para discriminar cada uma dessas classes. Também foi aplicada a técnica LDA (<em>Latent Dirichlet Allocation</em>) de detecção de tópicos em cada um desses grupos para verificar a co-ocorrência de termos nos conjunto de documentos. Por fim, uma estratégia de detecção de compras suspeitas foi proposta.</p>
+<p>O sistema foi construído em Python 3.5 com ajudas de bibliotecas tais como <em>Pandas</em>, <em>Nltk</em>, <em>Scikit-Learn</em>, <em>Gensim</em>, <em>Matplotlib</em>, <em>Wordcloud</em> dentre outras. O código foi separado em classes conforme as responsabilidades do fluxo de trabalho: <strong>Coletor</strong>, <strong>Extrator</strong>, <strong>Processador</strong> e <strong>Analisador</strong>.</p>
+<p>Cada uma das etapas será melhor descrita nas seções seguintes, bem como as observações e conclusões obtidas após as análises feitas.</p>
+<h2 id="coleta-dos-documentos">Coleta dos documentos</h2>
+<p>O site http://compras.dados.gov.br não só permite navegar pelos dados através de sua interface em HTML, mas também oferece APIs que retornam documentos Json.
+Há uma <a href="http://compras.dados.gov.br/docs/lista-metodos-licitacoes.html">API própria para as licitações</a>, e outra <a href="http://compras.dados.gov.br/docs/lista-metodos-compraSemLicitacao.html">API própria para as compras sem licitação</a>.
+Ambas possuem características diferentes mas permitem igualmente consultar uma numerosa lista paginada com todas as compras de um determinado serviço. Em ambas as APIs, uma compra pode envolver mais de um item, e assim é preciso também fazer novos acessos para encontrar os detalhes textuais daquele item.</p>
+<p>Foi desenvolvida uma estratégia de coletada automatizada que busca todas as compras e licitações de um determinado serviço, com seus respectivos itens.
+A classe <strong>Coletor</strong> é responsável por essa parte do fluxo de trabalho, navegando pelas APIs, indo para as próximas páginas quando essas existem e guardando todas as respostas Json obtidas num <strong>diretório de cache</strong>.
+Dessa forma, ao ser re-executada, as compras já coletadas não são re-visitadas. Com isso, uma vez finalizada a coleta de todas as respostas das compras de um serviço é possível trabalhar <em>offline</em> sem a necessidade de acessar a API novamente.</p>
+<p>Foi executada a coleta tanto para o <a href="http://compras.dados.gov.br/servicos/doc/servico/17663">serviço 17663</a> (Curso Aperfeiçoamento / Especialização Profissional) quanto para o <a href="http://compras.dados.gov.br/servicos/doc/servico/3239">serviço 3239</a> (Transporte Rodoviário - Pessoal por Automóveis).
+Ao fim das coletas, constaram mais de 40 mil arquivos JSON no direótório de cache. Novos serviços podem ser coletados se houver interesse.</p>
+<p>Além da navegação nas APIs de compras, também foi feita uma coleta simples da página de divulgação oficial da taxa SELIC (https://www.bcb.gov.br/pec/copom/port/taxaselic.asp), afim de subsidiar a atualização monetária dos valores das compras durante a análise.</p>
+<p>As coletas ocorreram entre 30/10/2018 e 15/11/2018.</p>
+<h2 id="extra%C3%A7%C3%A3o-de-dados">Extração de dados</h2>
+<p>Mediante a coleta finalizada dos documentos de um serviço, o <strong>Extrator</strong> é responsável por fazer o <em>parse</em> dos documentos coletados, organizando as informações em um banco de dados relacional SQLite3 que torna fácil consultar as informações dos documentos.</p>
+<p>Foram extraídos e armazenados como registros de uma tabela de documentos os seguintes dados:</p>
+<ul>
+<li>Id da Compra</li>
+<li>Id do Serviço</li>
+<li>Texto descritivo da compra</li>
+<li>Texto descritivos dos itens da compra</li>
+<li>Valor da compra (DOUBLE)</li>
+<li>Data da compra (DATE)</li>
+<li>Tipo (com licitação / sem licitação)</li>
+</ul>
+<p>Após a extração dos dados das compras, o banco de dados apresentou 3396 documentos do serviço 17663 (especialização) e 1842 documentos do serviço 3239 (transporte rodoviário).</p>
+<p>Cada serviço tem os seus dados armazenados num banco separado, facilitando o manuseio nas etapas posteriores, já que as análises planejadas são feitas separadamente por serviço. A  presença da coluna <strong>Tipo</strong> torna o banco preparado para ser multi-serviço se necessáario. Ademais, a re-execução do <strong>Extrator</strong> apaga o banco e cria um novo, mas há como desligar essa abordagem.</p>
+<p>O extrator também é responsável por fazer o <em>scraping</em> do HTML da página com o histórico da taxa SELIC mensal desde 1997, recuperando as células da tabela através de expressões <em>XPath</em> e armazenando os dados  obtidos numa tabela onde consta:</p>
+<ul>
+<li>Data início (DATE)</li>
+<li>Data fim (DATE)</li>
+<li>Valor da taxa SELIC (DOUBLE)</li>
+</ul>
+<h2 id="processamento-dos-dados">Processamento dos dados</h2>
+<p>O <strong>Processador</strong> assume a existência do banco de dados relacional SQLite3 fruto da execução do <strong>Extrator</strong>, e a partir dele cria novas colunas e arquivos de apoio com dados que irão subsidiar a análise.</p>
+<p>A primeira responsabilidade do <strong>Processador</strong> é pré-processar o conteúdo textual de cada documento para tornar possível a criação de um bag-of-words mais otimizado que dará suporte às análises sobre os termos. O pré-processamento do texto incluiu:</p>
+<ul>
+<li>
+<p><strong>Texto em minúsculo</strong> - Optou-se por tratar todas as palavras em minúsculo.</p>
+</li>
+<li>
+<p><strong>Remoção de acentos</strong> - Foi verificado navegando nos documentos extraídos, há ocorrência de palavras iguais com e sem acentuação ao longo dos textos, o que prejudica a correta contagem da frequência dos termos.</p>
+</li>
+<li>
+<p><strong>Remoção da pontuação</strong> - Como não houve necessidade de preservar as sentenças, todas as palavras ficaram separadas por um único espaço, facilitando tratamentos posteriores. Isso foi feito com ajuda de um <strong>RegexpTokenizer</strong> que trasnformou o texto numa lista de palavras, ignorando espaços adjacentes e pontuação.</p>
+</li>
+<li>
+<p><strong>Remoção de tokens numéricos</strong> - Tokens apenas numéricos não foram incluídos no texto processado final pois não apresentaram benefício para a análise.</p>
+</li>
+<li>
+<p><strong>Remoção de palavras do domínio</strong> - Algumas expressões específicas do assunto Compras Goveernamentais estavam presentes nos documentos mas não contribuiram para uma boa compreensão do conteúdo das compras através da frequência de teremos. Sendo assim alguns termos foram removidos:</p>
+<pre class="hljs"><code><div>REMOVER = [ 'pregao eletronico', 'pregao', 'aquisicao', 'valor',
+  'limite' 'licitacao', 'licitacao', 'justificativa', 'edital',
+  'contratacao', 'fornecimento', 'prestacao', 'precos', 'preco',
+  'formacao','empresa', 'servico', 'servicos', 'inscricao',
+  'pagamento', 'taxa','para', 'objeto' ]
+</div></code></pre>
+</li>
+<li>
+<p><strong>União de palavras quebradas:</strong>
+Ao investigar a base de documentos visualmente, foi verificada uma grande ocorrência de palavras quebradas que deveriam estar unidas (ex: ca pacaitacação -&gt; capacitação, traba lho -&gt; trabalho).
+Para tenta resolver esse problema, foi proposta uma heurística sobre a sequência de tokens do texto. Se o <em>token i</em> concatenado ao <em>token i+1</em> formar uma palavra uma palavra integrante do vocabulário composto por todos documentos em questão, cuja frequência dessa palavra unida seja maior que 25% da frequência dos tokens separados, então os 2 tokens adjacentes são transformados num único token concatenado.</p>
+<p>Para que essa estratégia funcionasse foi preciso realizar uma primeira passada em todos os documentos para criar esse vocabulário e calcular as frequências dos tokens. Os resultados foram satisfatórios e trouxeram maior qualidade para a etapa de análise.</p>
+<p>O trecho de LOG abaixo demonstra algumas uniões de palavras que aconteceram durante o processamento:</p>
+<pre class="hljs"><code><div> ...
+ 2018-11-15 10:44:11,072 [DEBUG] - Unindo crit+erio
+ 2018-11-15 10:44:11,073 [DEBUG] - Unindo maqu+ina
+ 2018-11-15 10:44:11,099 [DEBUG] - Unindo mentori+ng
+ 2018-11-15 10:44:11,102 [DEBUG] - Unindo minis+trar
+ 2018-11-15 10:44:11,109 [DEBUG] - Unindo mer+cado
+ 2018-11-15 10:44:11,109 [DEBUG] - Unindo doce+ntes
+ 2018-11-15 10:44:11,109 [DEBUG] - Unindo integr+ada
+ 2018-11-15 10:44:11,109 [DEBUG] - Unindo oite+nta
+ 2018-11-15 10:44:11,126 [DEBUG] - Unindo univ+ersitaria
+ 2018-11-15 10:44:11,130 [DEBUG] - Unindo tra+nsferencia
+ 2018-11-15 10:44:11,132 [DEBUG] - Unindo amb+iente
+ 2018-11-15 10:44:11,137 [DEBUG] - Unindo enc+adernacao
+ 2018-11-15 10:44:11,142 [DEBUG] - Unindo w+indows
+ 2018-11-15 10:44:11,144 [DEBUG] - Unindo execut+iva
+ 2018-11-15 10:44:11,149 [DEBUG] - Unindo f+ormacao
+ 2018-11-15 10:44:11,152 [DEBUG] - Unindo vi+deo
+ 2018-11-15 10:44:11,163 [DEBUG] - Unindo te+cnicos    
+ ...
+</div></code></pre>
+</li>
+<li>
+<p><strong>Stemming</strong> - Por fim, a sequẽncia de termos pré-processados é reduzida ao seu radical usando o <em>stemmer</em> para Português <strong>nltk.stem.RSLPStemmer</strong>. Como o objetivo era entender o panorama das compras governamentais de um determinado serviço, era importante também contemplar termos legíveis nas análises. Para tanto, ao realizar o <em>stemming</em>, foi armazenado num dicionário as frequências de cada variação do radical, para que num pós-processamento a top-palavra fosse utilizada como representante daquele conjunto de termos.</p>
+<p>Abaixo segue uma entrada do dicionário de frequências:</p>
+<pre class="hljs"><code><div>&quot;estim&quot;: {
+    &quot;estimativas&quot;: 24,
+    &quot;estimada&quot;: 4,
+    &quot;estimados&quot;: 1,
+    &quot;estimativa&quot;: 1,
+    &quot;estimado&quot;: 3,
+    &quot;estimadas&quot;: 1
+},
+</div></code></pre>
+<p>No caso acima, a palavra <strong>estimativas</strong> é a melhor representante do radical <strong>estim</strong>, e será usada por exemplo para representar todas as demais palavras desse radical numa nuvem de palavra.</p>
+</li>
+</ul>
+<p>As decisões de pré-processamento do texto acima descritam foram feitas iterativamente com as análises, principalmente observando a qualidade da nuvem de palavra. O pré-processamento foi primordial para gerar uma nuvem com menos 'sujeira' e com frequências mais significativas para determinados assuntos. Abaixo segue um exemplo do texto antes e depois do processamento:</p>
+<table>
+<thead>
+<tr>
+<th>Texto puro</th>
+<th>Texto processsado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>Frete de veiculo no percurso redencao/kikretum/redencao.. Objeto: Pregão Eletrônico -  Contratação de emp resa especializada em serviço de instalação de linha de gases especiais.Justificativa: Conduzindo professores para a aldeia kikretum.</em></td>
+<td><em>frete veiculos percurso redencao kikretum redencao empresa especializada instalacao linha gases especial conduzir professores aldeia kikretum</em></td>
+</tr>
+</tbody>
+</table>
+<p>O processamento final feito sobre o texto foi o ajuste de um objeto do tipo <strong>sklean.feature_extraction.text.TfidfVectorizer</strong> que recebeu como entrada o texto pré-processado de cada documento, e ajustou-se para fazer o cálculo do TF-IDF (Term Frequency - Inverse Document Frequncy), que é uma medida que traduz a frequência de um termo naquela coleção de documentos, levando em conta também que termos frequentes em mutos documentos são menos discriminantes.</p>
+<p>O vetorizador foi configurado para trabalhar com 2000 palavras, cada uma sendo uma dimensão do <em>bag-of-words</em> final que pode representar um documento no espaço vetorial. O vetorizador também foi configurado para ignorar stopwords da língua Portuguesa através do <strong>nltk.corpus.stopwords</strong>.</p>
+<p>Esse vetorizador foi serializado para ser usado durante a análise sempre que fosse necessário avaliar as frequências dos termos da coleção, ou vetorizar um conjunto de documentos.</p>
+<p>Outra parte do processamento, não relacionada ao texto, foi o atualização monetária dos valores das compras pela taxa SELIC, permitindo assim uma análise mais justa das faixa de gasto maior e menor das compras durante a análise.</p>
+<h2 id="an%C3%A1lise">Análise</h2>
+<h3 id="frequ%C3%AAncia-de-termos">Frequência de termos</h3>
+<p>O <strong>Analisador</strong> utiliza os valores TF-IDF advindos do processamento para gerar nuvens de palavras onde as palavras com valores de frequências mais altas ficam em destaque. Foi</p>
+<p>Pororó x y.
+<img src="file:///home/rafael/Desktop/projetofinalri/out/17663/tagcloud_Faixa1.png?raw=true" alt=""></p>
+<p><img src="file:///home/rafael/Desktop/projetofinalri/out/17663/tagcloud_Faixa2.png?raw=true" alt=""></p>
+<h3 id="termos-discriminantes-naive-bayes">Termos Discriminantes (Naive Bayes)</h3>
+<p>Pororó x y.</p>
+<h3 id="modelagem-de-t%C3%B3%E1%B9%95icos-lda">Modelagem de Tóṕicos (LDA)</h3>
+<p>Tópicos encontrados pelo LDA - 5 tópicos, 20 passadas, 4 palavras:</p>
+<ol>
+<li>
+<p>0.041*&quot;aplicacao&quot; + 0.040*&quot;prepom&quot; + 0.040*&quot;aquaviarios&quot; + 0.039*&quot;previstos&quot;</p>
+</li>
+<li>
+<p>0.016*&quot;curso&quot; + 0.015*&quot;gestao&quot; + 0.015*&quot;treinamento&quot; + 0.013*&quot;cur&quot;</p>
+</li>
+<li>
+<p>0.015*&quot;curso&quot; + 0.014*&quot;servidores&quot; + 0.007*&quot;periodo&quot; + 0.007*&quot;material&quot;</p>
+</li>
+<li>
+<p>0.022*&quot;conforme&quot; + 0.019*&quot;quantidades&quot; + 0.018*&quot;exigencias&quot; + 0.018*&quot;militares&quot;</p>
+</li>
+<li>
+<p>0.039*&quot;arte&quot; + 0.038*&quot;acordo&quot; + 0.034*&quot;ensino&quot; + 0.021*&quot;cacoal&quot;</p>
+</li>
+</ol>
+<h2 id="identifica%C3%A7%C3%A3o-de-padr%C3%B5es">Identificação de Padrões</h2>
+<p>Fazer uma análise da ocorrência dos padrões abaixo.</p>
+<p>curso de *
+especialização em *
+mestrado em *
+doutorado em *
+graduação em *</p>
+<h2 id="termos-que-mais-agregam-pre%C3%A7o-%C3%A0s-licita%C3%A7%C3%B5escompras">Termos que mais agregam preço às licitações/compras</h2>
+<h2 id="s%C3%A9rie-temporal-de-algum-termo-espec%C3%ADfico">Série temporal de algum termo específico</h2>
+<h2 id="anota%C3%A7%C3%B5es">Anotações:</h2>
+<p>https://www.kaggle.com/ykhorramz/lda-and-t-sne-interactive-visualization</p>
+
+</body>
+</html>
