@@ -436,6 +436,8 @@ Foram encontrada 41 suspeitas. Algumas delas:
 
 A primeira suspeita acima, da compra #78, foi investigada no site do governo e apresentou dados cuja interpretação de fato gera dúvidas. Sua descrição indica *"prestação de serviços de limpeza e conservação prediais"*. Já sua justificativa alega "entidade Jurídica de direito privado, sem fins lucrativos, especializada para desenvolvimento dos cursos de qualificação". Ademais, a descrição do único item que compõe a compra é: "realização de 50 cursos, atendendo 11 Estados da Federação, para qualificação de 2.000 (dois mil) Agentes Municipais de Trânsito, sendo 50 (cinquenta) turmas de 40 (quarenta) alunos cada." É importante destacar que pode também se tratar de um erro na base de dados.
 
+No treino acima pode-se observar que 41 dos 49 registros da Faixa 2 foram classificados como da Faixa 1. É importante observar que, como a quantidade de amostras da Faixa 2 é muito menor que da Faixa 1, seria melhor indicado utilizar algoritmos de aprendizado de máquina para dados não-balanceados, já que a probabilidade de um registro ser da Faixa 1 acaba naturalmente sendo muito alta diante dos dados de ajuste e com isso é muito fácil obter alta precisão nos testes.
+
 #### Resultado da identificação de compras suspeitas para o serviço 3239 (Transporte Rodoviário de Pessoas):
 
 Classes: 
