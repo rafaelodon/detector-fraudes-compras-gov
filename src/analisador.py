@@ -21,7 +21,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import LinearSVC
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import cross_val_score
+from imblearn.over_sampling import RandomOverSampler
 
 import gensim 
 import pyLDAvis.gensim
@@ -166,27 +169,30 @@ class Analisador:
         self.lista_features_importantes(classificador)
 
     def obter_df_texto_faixa_gasto(self):        
-        df = pd.read_sql_query("SELECT id, id_compra_licitacao, texto_processado, valor_atualizado as valor, tipo FROM documentos WHERE valor > 0", self.connection)                
-        p = scipy.stats.percentileofscore(df['valor'], df['valor'].mean() + df['valor'].std())
-        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, p/100, 1], labels=['Faixa 1', 'Faixa 2'])                
-        return df
+        df = pd.read_sql_query("SELECT id, id_compra_licitacao, texto_processado, valor_atualizado/quantidade as valor, tipo FROM documentos WHERE valor > 0", self.connection)                
+        #p = scipy.stats.percentileofscore(df['valor'], df['valor'].mean() + df['valor'].std())
+        p = 60
+        df['faixa_gasto'] = pd.qcut(df['valor'], q=[0, p/100, 1], labels=['Faixa 1', 'Faixa 2'])        
+        return df, p
         
     def identificar_compras_suspeitas(self):
         
         logging.debug('Processando documentos')    
         
-        df = self.obter_df_texto_faixa_gasto()
+        df, corte = self.obter_df_texto_faixa_gasto()
 
         x = self.vectorizer.transform(df['texto_processado']).toarray()        
+        print(x)
         y = df['faixa_gasto']
 
         logging.debug("Verificando a acurácia do classificador Random Forest")
         estimadores = 5
         profundidade = 10
         folds = 5
-        classificador = RandomForestClassifier(n_estimators=estimadores, max_depth=profundidade, random_state=0)
+        #classificador = RandomForestClassifier(n_estimators=estimadores, max_depth=profundidade, random_state=0)        
+        classificador = LinearSVC()                
         acuracias = cross_val_score(classificador, x, y, cv=folds)
-        logging.debug("Acurácias:"+str(acuracias))        
+        logging.info("Acurácias da validação cruzada:"+str(acuracias))        
 
         df_faixa1 = df.loc[df['faixa_gasto'] == 'Faixa 1']
         df_faixa2 = df.loc[df['faixa_gasto'] == 'Faixa 2']
@@ -194,7 +200,16 @@ class Analisador:
         qtd_faixa2 = len(df_faixa2)                
         corte = df['valor'].mean() + df['valor'].std()
         
-        classificador.fit(x, y)
+        ros = RandomOverSampler(random_state=0)
+        x_resampled, y_resampled = ros.fit_resample(x, y)
+
+        classificador.fit(x_resampled, y_resampled)
+        yPred = classificador.predict(x_resampled)
+        logging.info("Relatório de classificação:")
+        [logging.info(s) for s in classification_report(y_resampled, yPred).split('\n')]
+        
+        logging.info("Matriz de confusão:")
+        [logging.info(s) for s in confusion_matrix(y_resampled, yPred)]
 
         logging.debug("Classificando documentos para encontrar suspeitas")
         suspeitas = []              
@@ -246,7 +261,7 @@ class Analisador:
         
     def analisar_valores(self):
 
-        df = pd.read_sql_query("SELECT tipo, valor_atualizado as valor FROM documentos WHERE valor > 0", self.connection)
+        df = pd.read_sql_query("SELECT tipo, valor_atualizado/quantidade as valor FROM documentos WHERE valor > 0", self.connection)
         pd.options.display.float_format = '{:.2f}'.format        
         
         vmin = df['valor'].min()        

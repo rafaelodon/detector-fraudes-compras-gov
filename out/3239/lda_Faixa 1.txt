@@ -1,3 +1,3 @@
-0.030*"frete" + 0.028*"aldeia" + 0.023*"memo" + 0.021*"transporte" + 0.016*"barra" + 0.014*"percurso" + 0.013*"indios" + 0.012*"aerbgs" + 0.012*"ate" + 0.012*"sao"
-0.017*"transporte" + 0.013*"frete" + 0.009*"atender" + 0.009*"memo" + 0.008*"onibus" + 0.008*"conforme" + 0.007*"anexo" + 0.006*"materiais" + 0.006*"caramuru" + 0.005*"veiculos"
-0.036*"transporte" + 0.013*"veiculos" + 0.012*"frete" + 0.012*"indigenas" + 0.009*"atender" + 0.009*"materiais" + 0.006*"pessoas" + 0.006*"conforme" + 0.006*"aldeia" + 0.006*"especializada"
+0.018*"transporte" + 0.012*"frete" + 0.010*"veiculos" + 0.007*"indigenas" + 0.006*"aldeia" + 0.006*"rodado" + 0.006*"memo" + 0.006*"atender" + 0.006*"manutencao" + 0.006*"locacao"
+0.029*"frete" + 0.025*"transporte" + 0.024*"aldeia" + 0.023*"memo" + 0.014*"barra" + 0.013*"percurso" + 0.011*"materiais" + 0.011*"ate" + 0.011*"indios" + 0.011*"aerbgs"
+0.031*"transporte" + 0.011*"atender" + 0.009*"onibus" + 0.009*"veiculos" + 0.008*"frete" + 0.008*"pessoas" + 0.007*"conforme" + 0.006*"pessoal" + 0.006*"anexo" + 0.006*"necessidades"

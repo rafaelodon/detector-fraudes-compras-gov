@@ -44,6 +44,7 @@ class Extrator():
                 texto TEXT CLOB,
                 texto_itens TEXT CLOB,
                 valor DOUBLE,
+                quantidade INTEGER,
                 data DATE,
                 id_servico VARCHAR(10),
                 id_compra_licitacao VARCHAR(100),
@@ -62,9 +63,17 @@ class Extrator():
         self.licitacoes_analisadas = dict()
 
     def __gravar_documento(self, doc):        
-        sql = '''INSERT INTO documentos (arquivo, texto, texto_itens, valor, data, id_servico, id_compra_licitacao, tipo) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)'''
-        self.cursor.execute(sql, (doc['arquivo'], doc['texto'], doc['texto_itens'], doc['valor'], doc['data'], doc['id_servico'], doc['id_compra_licitacao'], doc['tipo']))                    
+        sql = '''INSERT INTO documentos (arquivo, texto, texto_itens, valor, quantidade, data, id_servico, id_compra_licitacao, tipo) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'''
+        self.cursor.execute(sql, (doc['arquivo'],\
+                doc['texto'],\
+                doc['texto_itens'],\
+                doc['valor'],\
+                doc['quantidade'],\
+                doc['data'],\
+                doc['id_servico'],\
+                doc['id_compra_licitacao'],\
+                doc['tipo']))
 
     def __extrair_texto_compras_servico(self, id_servico):
         for file in glob.glob(self.base_dir+'/compras_servico'+id_servico+'*.json'):
@@ -75,6 +84,8 @@ class Extrator():
                 compras = json_compras['_embedded']['compras']
                 for compra in compras:                                        
                     texto_itens = ''
+                    quantidade = 0
+                    valor_total = 0.0
                     id_compra = compra['_links']['self']['href'].split('/')[4]
                     if id_compra in self.compras_analisadas:
                         logging.debug('A compra '+id_compra+' já havia sido extraída')
@@ -89,21 +100,25 @@ class Extrator():
                                     json_itens = json.loads(txt_itens)
                                     itens = json_itens['_embedded']['compras']
                                     for item in itens:
-                                        texto_itens += item['ds_detalhada'] + '. '                            
+                                        texto_itens += item['ds_detalhada'] + '. '  
+                                        quantidade += int(item['qt_material_alt'])
+                                        valor_total += float(item['vr_estimado'])
                         except KeyError:
                             pass
 
-                        try:              
-                            self.__gravar_documento({
-                                'arquivo' : file,                            
-                                'texto' : compra['ds_objeto_licitacao'] + compra['ds_justificativa'],
-                                'texto_itens' : texto_itens,
-                                'valor' : float(compra['vr_estimado']),
-                                'data' : datetime.strptime(compra['dtDeclaracaoDispensa'], '%Y-%m-%dT%H:%M:%S'),
-                                'id_servico' : id_servico,
-                                'id_compra_licitacao' : id_compra,
-                                'tipo' : 'compra'
-                            })
+                        try:     
+                            if(valor_total > 0 and quantidade > 0):         
+                                self.__gravar_documento({
+                                    'arquivo' : file,                            
+                                    'texto' : compra['ds_objeto_licitacao'] + compra['ds_justificativa'],
+                                    'texto_itens' : texto_itens,
+                                    'valor' : float(compra['vr_estimado']),
+                                    'quantidade' : quantidade,
+                                    'data' : datetime.strptime(compra['dtDeclaracaoDispensa'], '%Y-%m-%dT%H:%M:%S'),
+                                    'id_servico' : id_servico,
+                                    'id_compra_licitacao' : id_compra,
+                                    'tipo' : 'compra'
+                                })
                         except KeyError:
                             pass
             self.connection.commit()
@@ -117,6 +132,8 @@ class Extrator():
                 licitacoes = json_licitacoes['_embedded']['licitacoes']
                 for licitacao in licitacoes:                    
                     texto_itens = ''
+                    quantidade = 0
+                    valor_total = 0.0
                     id_licitacao = licitacao['_links']['self']['href'].split('/')[4]                        
                     if id_licitacao in self.licitacoes_analisadas:
                         logging.debug('A licitação '+id_licitacao+' já havia sido extraída')
@@ -134,20 +151,24 @@ class Extrator():
                                     for item in itens:
                                         texto_itens += item['descricao_item'] + '. '
                                         valor += item['valor_estimado']
+                                        quantidade += int(item['quantidade'])
+                                        valor_total += float(item['valor_estimado'])
                         except KeyError:
                             pass
 
-                        try:                        
-                            self.__gravar_documento({
-                                'arquivo' : file,                            
-                                'texto' : licitacao['objeto'],
-                                'texto_itens' : texto_itens,
-                                'valor' : valor,
-                                'data' : datetime.strptime(licitacao['data_entrega_proposta'], '%Y-%m-%dT%H:%M:%S'),
-                                'id_servico' : id_servico,
-                                'id_compra_licitacao' : id_licitacao,
-                                'tipo' : 'licitacao'
-                            })
+                        try:    
+                            if( valor_total > 0 and quantidade > 0):                   
+                                self.__gravar_documento({
+                                    'arquivo' : file,                            
+                                    'texto' : licitacao['objeto'],
+                                    'texto_itens' : texto_itens,
+                                    'valor' : valor,
+                                    'quantidade' : quantidade,
+                                    'data' : datetime.strptime(licitacao['data_entrega_proposta'], '%Y-%m-%dT%H:%M:%S'),
+                                    'id_servico' : id_servico,
+                                    'id_compra_licitacao' : id_licitacao,
+                                    'tipo' : 'licitacao'
+                                })
                         except KeyError:
                             pass
             self.connection.commit()
